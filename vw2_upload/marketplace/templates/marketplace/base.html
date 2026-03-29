@@ -1,0 +1,133 @@
+{% load static %}<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <title>{% block title %}Vehicle World — India's Premium Marketplace{% endblock %}</title>
+  <link rel="icon" href="{% static 'marketplace/images/logo.png' %}">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+  <link href="{% static 'marketplace/css/main.css' %}" rel="stylesheet">
+  {% block extra_css %}{% endblock %}
+</head>
+<body>
+<div class="hero-bg-glow"></div>
+<nav class="nav">
+  <div class="nav-inner">
+    <a class="nav-logo" href="{% url 'home' %}">
+      <img src="{% static 'marketplace/images/logo.png' %}" alt="VW">
+      <span class="nav-logo-text">VEHICLE <em>WORLD</em></span>
+    </a>
+    <div class="nav-links" id="navLinks">
+      <a class="nav-link {% block nl_home %}{% endblock %}" href="{% url 'home' %}">Home</a>
+      <a class="nav-link {% block nl_list %}{% endblock %}" href="{% url 'listings' %}">Listings</a>
+      <a class="nav-link {% block nl_cat %}{% endblock %}" href="{% url 'home' %}#cats">Categories</a>
+      <a class="nav-link {% block nl_sell %}{% endblock %}" href="{% url 'sellers' %}">Sellers</a>
+      <a class="nav-link nav-electric {% block nl_ev %}{% endblock %}" href="{% url 'electric_hub' %}">⚡ EV Hub</a>
+    </div>
+    <div class="nav-actions">
+      {% if user.is_authenticated %}
+        {% with role=user.profile.role %}
+        {% if role == 'seller' %}
+          <a class="nav-link" href="{% url 'add_listing' %}" style="color:var(--ember);font-weight:700;"><i class="bi bi-plus-circle-fill"></i> Add Listing</a>
+          <a class="nav-link {% block nl_dash %}{% endblock %}" href="{% url 'dashboard' %}"><i class="bi bi-speedometer2"></i> Dashboard</a>
+          <a class="nav-link {% block nl_inbox %}{% endblock %}" href="{% url 'inbox' %}"><i class="bi bi-chat-dots"></i> Messages</a>
+        {% else %}
+          <a class="nav-link" href="{% url 'saved' %}"><i class="bi bi-heart"></i> Saved</a>
+          <a class="nav-link {% block nl_inbox_b %}{% endblock %}" href="{% url 'inbox' %}"><i class="bi bi-chat-dots"></i> Chats</a>
+        {% endif %}
+        <div class="nav-user">
+          <div class="nav-avatar">{{ user.first_name.0|default:user.username.0|upper }}</div>
+          <div class="nav-dropdown">
+            <div style="padding:0.5rem 0.75rem 0.25rem;">
+              <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:0.88rem;color:var(--cream);">{{ user.get_full_name|default:user.username }}</div>
+              <span class="nav-role-badge {% if role == 'seller' %}role-seller{% else %}role-buyer{% endif %}" style="margin-top:0.25rem;display:inline-block;">{{ role }}</span>
+            </div>
+            <div class="nav-dropdown-divider"></div>
+            {% if role == 'seller' %}
+            <a class="nav-dropdown-item" href="{% url 'dashboard' %}"><i class="bi bi-speedometer2"></i> Dashboard</a>
+            <a class="nav-dropdown-item" href="{% url 'add_listing' %}"><i class="bi bi-plus-circle"></i> Add Listing</a>
+            <a class="nav-dropdown-item" href="{% url 'inbox' %}"><i class="bi bi-chat-dots"></i> Messages</a>
+            {% else %}
+            <a class="nav-dropdown-item" href="{% url 'saved' %}"><i class="bi bi-heart"></i> Saved</a>
+            <a class="nav-dropdown-item" href="{% url 'inbox' %}"><i class="bi bi-chat-dots"></i> My Chats</a>
+            {% endif %}
+            <div class="nav-dropdown-divider"></div>
+            <a class="nav-dropdown-item" href="{% url 'logout' %}"><i class="bi bi-box-arrow-right"></i> Logout</a>
+          </div>
+        </div>
+        {% endwith %}
+      {% else %}
+        <a class="nav-pill nav-pill-outline" href="{% url 'login' %}">Login</a>
+        <a class="nav-pill nav-pill-fill" href="{% url 'register' %}">Register</a>
+      {% endif %}
+      <div class="hamburger" onclick="document.getElementById('navLinks').classList.toggle('open')">
+        <span></span><span></span><span></span>
+      </div>
+    </div>
+  </div>
+</nav>
+{% if messages %}
+<div style="max-width:1280px;margin:0 auto;padding:0.75rem 2rem 0;">
+  {% for m in messages %}
+  <div class="vw-alert vw-alert-{% if 'error' in m.tags %}error{% elif 'info' in m.tags %}info{% else %}success{% endif %}">
+    {{ m }}<button class="alert-close" onclick="this.parentElement.remove()">×</button>
+  </div>
+  {% endfor %}
+</div>
+{% endif %}
+{% block content %}{% endblock %}
+<footer class="footer">
+  <div class="container">
+    <div style="display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:3rem;flex-wrap:wrap;">
+      <div>
+        <div class="footer-logo">
+          <img src="{% static 'marketplace/images/logo.png' %}" alt="VW">
+          <span class="footer-logo-text">VEHICLE <em>WORLD</em></span>
+        </div>
+        <p class="footer-desc">India's premium vehicle marketplace. Buyers and verified sellers, connected directly — no middlemen, no hidden fees.</p>
+      </div>
+      <div>
+        <div class="footer-col-title">Categories</div>
+        <div class="footer-links">
+          <a href="{% url 'category' 'two_wheeler' %}">🏍️ Two Wheelers</a>
+          <a href="{% url 'category' 'three_wheeler' %}">🛺 Three Wheelers</a>
+          <a href="{% url 'category' 'four_wheeler' %}">🚗 Four Wheelers</a>
+          <a href="{% url 'electric_hub' %}">⚡ EV Hub</a>
+        </div>
+      </div>
+      <div>
+        <div class="footer-col-title">Browse</div>
+        <div class="footer-links">
+          <a href="{% url 'listings' %}">All Listings</a>
+          <a href="{% url 'sellers' %}">Sellers</a>
+        </div>
+      </div>
+      <div>
+        <div class="footer-col-title">Account</div>
+        <div class="footer-links">
+          {% if user.is_authenticated %}
+            {% if user.profile.role == 'seller' %}
+            <a href="{% url 'dashboard' %}">Dashboard</a>
+            <a href="{% url 'add_listing' %}">Add Listing</a>
+            <a href="{% url 'inbox' %}">Messages</a>
+            {% else %}
+            <a href="{% url 'saved' %}">Saved</a>
+            <a href="{% url 'inbox' %}">My Chats</a>
+            {% endif %}
+            <a href="{% url 'logout' %}">Logout</a>
+          {% else %}
+          <a href="{% url 'login' %}">Login</a>
+          <a href="{% url 'register_buyer' %}">Register as Buyer</a>
+          <a href="{% url 'register_seller' %}">Register as Seller</a>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2024 Vehicle World. All rights reserved.</span>
+      <span style="display:flex;align-items:center;gap:0.5rem;"><img src="{% static 'marketplace/images/logo.png' %}" style="height:18px;opacity:0.5;"> Made in India 🇮🇳</span>
+    </div>
+  </div>
+</footer>
+{% block extra_js %}{% endblock %}
+</body>
+</html>

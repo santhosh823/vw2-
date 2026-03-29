@@ -1,0 +1,18 @@
+{% extends 'marketplace/base.html' %}
+{% block title %}Delete Listing — Vehicle World{% endblock %}
+{% block content %}
+<div style="min-height:calc(100vh - 64px);display:flex;align-items:center;justify-content:center;padding:2rem;">
+  <div class="card-panel" style="max-width:440px;width:100%;text-align:center;">
+    <div style="font-size:3.5rem;margin-bottom:1.25rem;">⚠️</div>
+    <h2 style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.6rem;color:var(--cream);margin-bottom:0.5rem;">Delete Listing</h2>
+    <p style="color:var(--cream2);margin-bottom:0.5rem;">You're about to permanently delete:</p>
+    <p style="font-family:'Syne',sans-serif;font-weight:700;color:var(--cream);margin-bottom:2rem;">{{ v.brand }} {{ v.model_name }} ({{ v.year }})</p>
+    <p style="color:#f87171;font-size:0.82rem;margin-bottom:1.75rem;">This cannot be undone.</p>
+    <form method="post" style="display:flex;gap:0.75rem;">
+      {% csrf_token %}
+      <button type="submit" class="btn btn-ghost" style="flex:1;justify-content:center;color:#f87171;border-color:rgba(248,113,113,0.3);">Yes, Delete</button>
+      <a href="{% url 'dashboard' %}" class="btn btn-ghost" style="flex:1;justify-content:center;">Cancel</a>
+    </form>
+  </div>
+</div>
+{% endblock %}

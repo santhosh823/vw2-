@@ -1,0 +1,36 @@
+{% load static %}
+<div class="vcard">
+  <div class="vcard-img">
+    {% if vehicle.is_featured %}<span class="vcard-badge vcard-badge-tr badge badge-featured">⭐ Featured</span>{% endif %}
+    {% if show_new and vehicle.is_new_listing %}<span class="vcard-badge vcard-badge-tl badge badge-new">New</span>{% endif %}
+    {% if vehicle.discount_pct %}<span class="vcard-badge vcard-badge-tl badge badge-discount">-{{ vehicle.discount_pct }}%</span>{% endif %}
+    {% if vehicle.image %}
+      <img src="{{ vehicle.image.url }}" alt="{{ vehicle.title }}" loading="lazy">
+    {% else %}
+      <div class="vcard-img-placeholder">{% if vehicle.category.slug == 'two_wheeler' %}🏍️{% elif vehicle.category.slug == 'three_wheeler' %}🛺{% else %}🚗{% endif %}</div>
+    {% endif %}
+  </div>
+  <div class="vcard-body">
+    <div class="vcard-cat">{{ vehicle.category.name }}</div>
+    <div class="vcard-title">{{ vehicle.brand }} {{ vehicle.model_name }} <span style="font-weight:400;color:var(--cream2);">({{ vehicle.year }})</span></div>
+    <div class="vcard-meta">
+      <span class="vcard-meta-item"><i class="bi bi-speedometer2"></i>{{ vehicle.mileage }}</span>
+      <span class="vcard-meta-item"><i class="bi bi-lightning"></i>{{ vehicle.get_fuel_type_display }}</span>
+      {% if vehicle.km_driven > 0 %}<span class="vcard-meta-item"><i class="bi bi-geo"></i>{{ vehicle.km_driven|floatformat:0 }} km</span>{% endif %}
+    </div>
+    <div class="vcard-price-row">
+      <div class="vcard-price">{{ vehicle.formatted_price }}</div>
+      {% if vehicle.original_price and vehicle.original_price > vehicle.price %}
+      <div class="vcard-orig">{{ vehicle.original_price }}</div>
+      {% endif %}
+      {% if vehicle.is_negotiable %}<span class="vcard-neg">Nego.</span>{% endif %}
+    </div>
+  </div>
+  <div class="vcard-location"><i class="bi bi-geo-alt"></i> {{ vehicle.seller.location }}</div>
+  <div class="vcard-foot">
+    <a href="{% url 'vehicle_detail' vehicle.pk %}" class="btn btn-ember btn-sm" style="flex:1;justify-content:center;">View Details</a>
+    {% if user.is_authenticated and user.profile.role == 'buyer' %}
+    <a href="{% url 'toggle_save' vehicle.pk %}" class="btn btn-ghost btn-sm btn-icon" title="Save"><i class="bi bi-heart"></i></a>
+    {% endif %}
+  </div>
+</div>

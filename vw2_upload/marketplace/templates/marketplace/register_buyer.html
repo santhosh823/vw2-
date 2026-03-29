@@ -1,0 +1,38 @@
+{% extends 'marketplace/base.html' %}
+{% block title %}Buyer Registration — Vehicle World{% endblock %}
+{% block content %}
+<div class="auth-layout">
+  <div class="auth-visual">
+    <div class="auth-visual-bg"></div>
+    <div style="position:relative;text-align:center;">
+      <div style="font-size:5rem;margin-bottom:1.5rem;">🛒</div>
+      <h2 style="font-family:'Syne',sans-serif;font-weight:800;font-size:2rem;color:var(--cream);">Buyer Account</h2>
+      <p style="color:var(--cream2);margin-top:1rem;font-size:0.9rem;max-width:260px;line-height:1.7;">Discover thousands of vehicles. Save favourites. Connect with sellers directly.</p>
+      <a href="{% url 'register' %}" style="display:inline-flex;align-items:center;gap:0.4rem;color:var(--cream2);text-decoration:none;font-size:0.82rem;margin-top:2rem;font-family:'DM Mono',monospace;letter-spacing:0.08em;"><i class="bi bi-arrow-left"></i> Back to account types</a>
+    </div>
+  </div>
+  <div class="auth-form-area">
+    <div class="auth-card" style="max-width:480px;">
+      <h1 class="auth-title">Create Buyer Account</h1>
+      <p class="auth-sub">Free forever — no credit card needed</p>
+      <form method="post" novalidate>
+        {% csrf_token %}
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+          <div class="form-group"><label class="form-label">First Name</label><input class="vw-input" name="first_name" placeholder="First name" value="{{ form.first_name.value|default:'' }}" autofocus>{% if form.first_name.errors %}<div class="form-error">{{ form.first_name.errors.0 }}</div>{% endif %}</div>
+          <div class="form-group"><label class="form-label">Last Name</label><input class="vw-input" name="last_name" placeholder="Last name" value="{{ form.last_name.value|default:'' }}">{% if form.last_name.errors %}<div class="form-error">{{ form.last_name.errors.0 }}</div>{% endif %}</div>
+        </div>
+        <div class="form-group"><label class="form-label">Username</label><input class="vw-input" name="username" placeholder="Choose a username" value="{{ form.username.value|default:'' }}">{% if form.username.errors %}<div class="form-error">{{ form.username.errors.0 }}</div>{% endif %}</div>
+        <div class="form-group"><label class="form-label">Email</label><input class="vw-input" type="email" name="email" placeholder="your@email.com" value="{{ form.email.value|default:'' }}">{% if form.email.errors %}<div class="form-error">{{ form.email.errors.0 }}</div>{% endif %}</div>
+        <div class="form-group"><label class="form-label">Phone <span style="color:var(--cream2);font-size:0.7rem;">(optional)</span></label><input class="vw-input" name="phone" placeholder="+91 XXXXX XXXXX"></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+          <div class="form-group"><label class="form-label">Password</label><input class="vw-input" type="password" name="password1">{% if form.password1.errors %}<div class="form-error">{{ form.password1.errors.0 }}</div>{% endif %}</div>
+          <div class="form-group"><label class="form-label">Confirm</label><input class="vw-input" type="password" name="password2">{% if form.password2.errors %}<div class="form-error">{{ form.password2.errors.0 }}</div>{% endif %}</div>
+        </div>
+        <button type="submit" class="btn btn-cobalt btn-full btn-lg" style="margin-top:0.5rem;">🛒 Create Buyer Account</button>
+      </form>
+      <div class="auth-divider"><span>or</span></div>
+      <p style="text-align:center;font-size:0.88rem;color:var(--cream2);">Want to sell? <a href="{% url 'register_seller' %}" style="color:var(--ember);text-decoration:none;">Register as Seller</a></p>
+    </div>
+  </div>
+</div>
+{% endblock %}

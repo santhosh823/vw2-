@@ -1,0 +1,72 @@
+{% extends 'marketplace/base.html' %}
+{% block title %}Messages — Vehicle World{% endblock %}
+{% block nl_inbox %}active{% endblock %}
+{% block nl_inbox_b %}active{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div class="container">
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem;">
+      <div>
+        <div style="font-family:'DM Mono',monospace;font-size:0.7rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--ember);margin-bottom:0.4rem;">
+          {% if role == 'seller' %}Message Inbox & Outbox{% else %}My Chats{% endif %}
+        </div>
+        <h1 class="page-header-title">Messages</h1>
+        <p style="color:var(--cream2);font-size:0.88rem;margin-top:0.4rem;font-family:'DM Mono',monospace;">
+          {{ convs.count }} conversation{{ convs.count|pluralize }}
+          {% if unread_total %}<span style="color:var(--ember);"> · {{ unread_total }} unread</span>{% endif %}
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<section class="section">
+  <div class="container" style="max-width:720px;">
+    {% if convs %}
+    <div class="inbox-list">
+      {% for conv in convs %}
+      {% with last=conv.last_message %}
+      {% if role == 'seller' %}{% with unread=conv.unread_for_seller %}
+      <a href="{% url 'chat_detail' conv.pk %}" class="inbox-item {% if unread %}unread{% endif %}">
+        <div class="inbox-avatar">{{ conv.buyer.first_name.0|default:conv.buyer.username.0|upper }}</div>
+        <div class="inbox-meta">
+          <div class="inbox-title">{{ conv.buyer.get_full_name|default:conv.buyer.username }}</div>
+          <div style="font-family:'DM Mono',monospace;font-size:0.62rem;color:var(--ember);margin-bottom:0.15rem;">Re: {{ conv.vehicle.title|truncatechars:40 }}</div>
+          <div class="inbox-preview">{% if last %}{{ last.body }}{% else %}No messages yet{% endif %}</div>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:0.4rem;flex-shrink:0;">
+          <div class="inbox-time">{% if last %}{{ last.sent_at|date:"d M, H:i" }}{% endif %}</div>
+          {% if unread %}<div class="unread-dot"></div>{% endif %}
+        </div>
+      </a>
+      {% endwith %}{% else %}{% with unread=conv.unread_for_buyer %}
+      <a href="{% url 'chat_detail' conv.pk %}" class="inbox-item {% if unread %}unread{% endif %}">
+        <div class="inbox-avatar">{{ conv.seller.name.0|upper }}</div>
+        <div class="inbox-meta">
+          <div class="inbox-title">{{ conv.seller.name }}</div>
+          <div style="font-family:'DM Mono',monospace;font-size:0.62rem;color:var(--ember);margin-bottom:0.15rem;">Re: {{ conv.vehicle.title|truncatechars:40 }}</div>
+          <div class="inbox-preview">{% if last %}{{ last.body }}{% else %}No messages yet{% endif %}</div>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:0.4rem;flex-shrink:0;">
+          <div class="inbox-time">{% if last %}{{ last.sent_at|date:"d M, H:i" }}{% endif %}</div>
+          {% if unread %}<div class="unread-dot"></div>{% endif %}
+        </div>
+      </a>
+      {% endwith %}{% endif %}
+      {% endwith %}
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-state">
+      <div class="empty-icon">💬</div>
+      <div class="empty-title">No conversations yet</div>
+      <p style="color:var(--cream2);font-size:0.88rem;margin-bottom:1.5rem;">
+        {% if role == 'buyer' %}Find a vehicle you like and tap "Chat with Seller" to start.{% else %}Buyers will message you when interested in your listings.{% endif %}
+      </p>
+      <a href="{% url 'listings' %}" class="btn btn-ember">Browse Listings</a>
+    </div>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}

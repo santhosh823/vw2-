@@ -1,0 +1,196 @@
+{% extends 'marketplace/base.html' %}
+{% block title %}{{ v.brand }} {{ v.model_name }} — Vehicle World{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div class="container">
+    <div class="breadcrumb">
+      <a href="{% url 'home' %}">Home</a><span class="breadcrumb-sep">/</span>
+      <a href="{% url 'listings' %}">Listings</a><span class="breadcrumb-sep">/</span>
+      <span>{{ v.brand }} {{ v.model_name }}</span>
+    </div>
+    <h1 class="page-header-title">{{ v.title }}</h1>
+    <div style="display:flex;align-items:center;gap:0.75rem;flex-wrap:wrap;margin-top:0.75rem;">
+      <span class="pill fuel-{{ v.fuel_type }}">{{ v.get_fuel_type_display }}</span>
+      <span style="font-family:'DM Mono',monospace;font-size:0.68rem;color:var(--cream2);"><i class="bi bi-eye" style="margin-right:0.3rem;"></i>{{ v.views_count }} views</span>
+      {% if v.is_new_listing %}<span class="badge badge-new">New Listing</span>{% endif %}
+    </div>
+  </div>
+</div>
+
+<div class="container" style="padding-top:2.5rem;padding-bottom:4rem;">
+  <div style="display:grid;grid-template-columns:1fr 380px;gap:2rem;align-items:start;">
+
+    <!-- LEFT -->
+    <div>
+      <!-- Gallery -->
+      <div class="detail-gallery" style="margin-bottom:1.75rem;">
+        {% if v.image %}<img class="detail-main-img" id="mainImg" src="{{ v.image.url }}" alt="{{ v.title }}">
+        {% else %}<div class="detail-main-placeholder">{% if v.category.slug == 'two_wheeler' %}🏍️{% elif v.category.slug == 'three_wheeler' %}🛺{% else %}🚗{% endif %}</div>{% endif %}
+        {% if v.image2 or v.image3 %}
+        <div class="detail-thumbs">
+          {% if v.image %}<div class="detail-thumb" onclick="document.getElementById('mainImg').src='{{ v.image.url }}'"><img src="{{ v.image.url }}" alt=""></div>{% endif %}
+          {% if v.image2 %}<div class="detail-thumb" onclick="document.getElementById('mainImg').src='{{ v.image2.url }}'"><img src="{{ v.image2.url }}" alt=""></div>{% endif %}
+          {% if v.image3 %}<div class="detail-thumb" onclick="document.getElementById('mainImg').src='{{ v.image3.url }}'"><img src="{{ v.image3.url }}" alt=""></div>{% endif %}
+        </div>
+        {% endif %}
+      </div>
+
+      <!-- Specs -->
+      <div class="card-panel" style="margin-bottom:1.75rem;">
+        <h3 style="font-family:'Syne',sans-serif;font-weight:700;font-size:1rem;color:var(--cream);margin-bottom:1.25rem;">Vehicle Specifications</h3>
+        <div class="spec-grid">
+          <div class="spec-cell"><div class="spec-label">Brand</div><div class="spec-value">{{ v.brand }}</div></div>
+          <div class="spec-cell"><div class="spec-label">Model</div><div class="spec-value">{{ v.model_name }}</div></div>
+          <div class="spec-cell"><div class="spec-label">Year</div><div class="spec-value">{{ v.year }}</div></div>
+          <div class="spec-cell"><div class="spec-label">Fuel</div><div class="spec-value"><span class="fuel-pill fuel-{{ v.fuel_type }}">{{ v.get_fuel_type_display }}</span></div></div>
+          <div class="spec-cell"><div class="spec-label">Mileage</div><div class="spec-value">{{ v.mileage }}</div></div>
+          <div class="spec-cell"><div class="spec-label">KM Driven</div><div class="spec-value">{% if v.km_driven == 0 %}Brand New{% else %}{{ v.km_driven }} km{% endif %}</div></div>
+          <div class="spec-cell"><div class="spec-label">Condition</div><div class="spec-value">{{ v.get_condition_display }}</div></div>
+          <div class="spec-cell"><div class="spec-label">Color</div><div class="spec-value">{{ v.color|default:"—" }}</div></div>
+          {% if v.engine_cc %}<div class="spec-cell" style="grid-column:1/-1;"><div class="spec-label">Engine</div><div class="spec-value">{{ v.engine_cc }}</div></div>{% endif %}
+        </div>
+      </div>
+
+      {% if v.description %}
+      <div class="card-panel" style="margin-bottom:1.75rem;">
+        <h3 style="font-family:'Syne',sans-serif;font-weight:700;font-size:1rem;color:var(--cream);margin-bottom:0.75rem;">Description</h3>
+        <p style="color:var(--cream2);line-height:1.8;font-size:0.92rem;">{{ v.description }}</p>
+      </div>
+      {% endif %}
+
+      <!-- Category tabs on detail page -->
+      <div style="margin-bottom:1.75rem;">
+        <h3 style="font-family:'Syne',sans-serif;font-weight:700;font-size:1rem;color:var(--cream);margin-bottom:1rem;">Browse by Category</h3>
+        <div class="cat-tabs">
+          <a href="{% url 'category' 'two_wheeler' %}" class="cat-tab {% if v.category.slug == 'two_wheeler' %}active{% endif %}"><span class="cat-tab-icon">🏍️</span> Two Wheeler</a>
+          <a href="{% url 'category' 'three_wheeler' %}" class="cat-tab {% if v.category.slug == 'three_wheeler' %}active{% endif %}"><span class="cat-tab-icon">🛺</span> Three Wheeler</a>
+          <a href="{% url 'category' 'four_wheeler' %}" class="cat-tab {% if v.category.slug == 'four_wheeler' %}active{% endif %}"><span class="cat-tab-icon">🚗</span> Four Wheeler</a>
+        </div>
+      </div>
+
+      {% if related %}
+      <div>
+        <h3 style="font-family:'Syne',sans-serif;font-weight:700;font-size:1.1rem;color:var(--cream);margin-bottom:1.5rem;">Similar Vehicles</h3>
+        <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:1rem;">
+          {% for rv in related %}{% include 'marketplace/partials/vcard.html' with vehicle=rv %}{% endfor %}
+        </div>
+      </div>
+      {% endif %}
+    </div>
+
+    <!-- RIGHT PANEL -->
+    <div style="position:sticky;top:80px;display:flex;flex-direction:column;gap:1.25rem;">
+
+      <!-- Price + Actions -->
+      <div class="detail-info-card">
+        <div class="detail-price-big">{{ v.formatted_price }}</div>
+        {% if v.original_price and v.original_price > v.price %}
+        <div style="display:flex;align-items:center;gap:0.75rem;margin-top:0.25rem;">
+          <span class="detail-orig">₹{{ v.original_price }}</span>
+          <span class="badge badge-discount">Save {{ v.discount_pct }}%</span>
+        </div>
+        {% endif %}
+        {% if v.is_negotiable %}<div style="font-family:'DM Mono',monospace;font-size:0.68rem;color:var(--green2);margin-top:0.25rem;">✓ Price Negotiable</div>{% endif %}
+        <div style="height:1px;background:var(--border);margin:1.25rem 0;"></div>
+        <div style="display:flex;flex-direction:column;gap:0.6rem;margin-bottom:1.25rem;">
+          <div style="display:flex;align-items:center;gap:0.6rem;font-size:0.88rem;color:var(--cream2);"><i class="bi bi-geo-alt"></i>{{ v.seller.location }}</div>
+          <div style="display:flex;align-items:center;gap:0.6rem;font-size:0.88rem;color:var(--cream2);"><i class="bi bi-calendar3"></i>Listed {{ v.created_at|date:"d M Y" }}</div>
+          <div style="display:flex;align-items:center;gap:0.6rem;font-size:0.88rem;color:var(--cream2);"><i class="bi bi-eye"></i>{{ v.views_count }} people viewed</div>
+        </div>
+
+        <!-- ACTION BUTTONS -->
+        {% if user.is_authenticated %}
+          {% if user.profile.role == 'buyer' %}
+          <!-- Chat with Seller -->
+          <a href="{% url 'start_conversation' v.pk %}" class="btn btn-ember btn-full" style="margin-bottom:0.5rem;">
+            <i class="bi bi-chat-dots-fill"></i> Chat with Seller
+          </a>
+          <!-- Booking Request -->
+          {% if not existing_request %}
+          <button onclick="document.getElementById('bookModal').style.display='flex'" class="btn btn-cobalt btn-full" style="margin-bottom:0.5rem;">
+            <i class="bi bi-calendar-check"></i> Send Booking Request
+          </button>
+          {% else %}
+          <div style="background:rgba(34,197,94,0.08);border:1px solid rgba(34,197,94,0.2);border-radius:var(--r);padding:0.75rem;text-align:center;font-family:'DM Mono',monospace;font-size:0.72rem;color:var(--green2);margin-bottom:0.5rem;">
+            ✓ Booking request sent ({{ existing_request.get_status_display }})
+          </div>
+          {% endif %}
+          <!-- Save -->
+          <a href="{% url 'toggle_save' v.pk %}" class="btn btn-ghost btn-full" style="margin-bottom:0.5rem;">
+            <i class="bi bi-heart{% if is_saved %}-fill{% endif %}"></i> {% if is_saved %}Saved{% else %}Save{% endif %}
+          </a>
+          <!-- Call -->
+          <a href="tel:{{ v.seller.phone }}" class="btn btn-green btn-full">
+            <i class="bi bi-telephone"></i> Call Seller
+          </a>
+          {% elif user.profile.role == 'seller' %}
+          <div style="background:rgba(255,77,0,0.06);border:1px solid rgba(255,77,0,0.15);border-radius:var(--r);padding:0.75rem;text-align:center;font-size:0.82rem;color:var(--cream2);">
+            Sellers cannot book or chat on listings.
+          </div>
+          {% endif %}
+        {% else %}
+        <a href="{% url 'login' %}" class="btn btn-ember btn-full" style="margin-bottom:0.5rem;">
+          <i class="bi bi-chat-dots"></i> Login to Chat / Book
+        </a>
+        {% endif %}
+      </div>
+
+      <!-- Seller Card -->
+      <a href="{% url 'seller_profile' v.seller.pk %}" class="seller-card" style="text-decoration:none;">
+        <div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:0.85rem;">
+          <div class="seller-avatar" style="width:44px;height:44px;">{{ v.seller.name.0|upper }}</div>
+          <div>
+            <div class="seller-name" style="font-size:0.92rem;">{{ v.seller.name }}</div>
+            <div class="seller-loc">{{ v.seller.location }}</div>
+          </div>
+        </div>
+        <div style="height:1px;background:var(--border);margin-bottom:0.75rem;"></div>
+        <div style="display:flex;justify-content:space-between;font-family:'DM Mono',monospace;font-size:0.65rem;color:var(--cream2);">
+          <span>{{ v.seller.listing_count }} active listings</span>
+          <span>★ {{ v.seller.rating }}</span>
+        </div>
+      </a>
+
+      <!-- Enquiry Form -->
+      <div class="enquiry-panel" id="enquiry">
+        <h3 style="font-family:'Syne',sans-serif;font-weight:700;font-size:1rem;color:var(--cream);margin-bottom:1.25rem;">Send Enquiry</h3>
+        <form method="post">
+          {% csrf_token %}
+          {% for field in form %}
+          <div class="form-group">
+            <label class="form-label">{{ field.label }}</label>
+            {{ field }}
+            {% if field.errors %}<div class="form-error">{{ field.errors.0 }}</div>{% endif %}
+          </div>
+          {% endfor %}
+          <button type="submit" class="btn btn-ember btn-full">Send Message</button>
+        </form>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- BOOKING REQUEST MODAL -->
+<div id="bookModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:3000;align-items:center;justify-content:center;padding:2rem;">
+  <div style="background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r2);padding:2rem;width:100%;max-width:440px;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem;">
+      <h3 style="font-family:'Syne',sans-serif;font-weight:700;font-size:1.1rem;color:var(--cream);">Send Booking Request</h3>
+      <button onclick="document.getElementById('bookModal').style.display='none'" style="background:none;border:none;color:var(--cream2);font-size:1.4rem;cursor:pointer;">×</button>
+    </div>
+    <p style="color:var(--cream2);font-size:0.85rem;margin-bottom:1.25rem;">Tell the seller why you're interested and when you'd like to meet.</p>
+    <form method="post" action="{% url 'send_booking_request' v.pk %}">
+      {% csrf_token %}
+      <div class="form-group">
+        <label class="form-label">Message to Seller</label>
+        <textarea name="message" class="vw-input" rows="3" placeholder="I'm interested in this vehicle and would like to schedule a test drive..."></textarea>
+      </div>
+      <div style="display:flex;gap:0.75rem;">
+        <button type="submit" class="btn btn-ember" style="flex:1;justify-content:center;"><i class="bi bi-calendar-check"></i> Send Request</button>
+        <button type="button" onclick="document.getElementById('bookModal').style.display='none'" class="btn btn-ghost">Cancel</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

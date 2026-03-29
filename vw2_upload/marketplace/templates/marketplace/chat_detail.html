@@ -1,0 +1,135 @@
+{% extends 'marketplace/base.html' %}
+{% block title %}Chat — Vehicle World{% endblock %}
+{% block nl_inbox %}active{% endblock %}
+{% block nl_inbox_b %}active{% endblock %}
+
+{% block extra_css %}
+<style>
+body { overflow:hidden; }
+.chat-page { display:flex; flex-direction:column; height:calc(100vh - 64px); }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="chat-page">
+
+  <!-- VEHICLE INFO BAR -->
+  <div class="chat-vehicle-bar">
+    <a href="{% url 'inbox' %}" style="color:var(--cream2);font-size:1.1rem;text-decoration:none;margin-right:0.25rem;"><i class="bi bi-arrow-left"></i></a>
+    {% if conv.vehicle.image %}
+    <img src="{{ conv.vehicle.image.url }}" class="chat-vehicle-thumb" alt="">
+    {% else %}
+    <div class="chat-vehicle-thumb" style="display:flex;align-items:center;justify-content:center;font-size:1rem;">
+      {% if conv.vehicle.category.slug == 'two_wheeler' %}🏍️{% elif conv.vehicle.category.slug == 'three_wheeler' %}🛺{% else %}🚗{% endif %}
+    </div>
+    {% endif %}
+    <div class="chat-vehicle-info">
+      <strong>{{ conv.vehicle.brand }} {{ conv.vehicle.model_name }} ({{ conv.vehicle.year }})</strong>
+      {{ conv.vehicle.formatted_price }} · <a href="{% url 'vehicle_detail' conv.vehicle.pk %}" style="color:var(--ember);text-decoration:none;font-size:0.72rem;">View Listing →</a>
+    </div>
+  </div>
+
+  <!-- CHAT HEADER -->
+  <div class="chat-header">
+    <div class="chat-header-avatar">
+      {% if role == 'seller' %}{{ conv.buyer.first_name.0|default:conv.buyer.username.0|upper }}
+      {% else %}{{ conv.seller.name.0|upper }}{% endif %}
+    </div>
+    <div>
+      <div class="chat-header-name">
+        {% if role == 'seller' %}{{ conv.buyer.get_full_name|default:conv.buyer.username }}
+        {% else %}{{ conv.seller.name }}{% endif %}
+      </div>
+      <div class="chat-header-sub">
+        {% if role == 'seller' %}Buyer{% else %}Seller · {{ conv.seller.location }}{% endif %}
+      </div>
+    </div>
+  </div>
+
+  <!-- MESSAGES -->
+  <div class="chat-messages" id="chatMessages">
+    {% if not msgs %}
+    <div style="text-align:center;padding:2rem;color:var(--cream2);font-size:0.88rem;">
+      <div style="font-size:2rem;margin-bottom:0.5rem;">👋</div>
+      Start the conversation! Ask about the vehicle, pricing or availability.
+    </div>
+    {% endif %}
+    {% for msg in msgs %}
+    <div class="chat-msg {% if msg.sender == request.user %}chat-msg-mine{% else %}chat-msg-theirs{% endif %}" data-id="{{ msg.pk }}">
+      <div class="chat-bubble">{{ msg.body }}</div>
+      <div class="chat-time">{{ msg.sent_at|date:"d M, H:i" }}</div>
+    </div>
+    {% endfor %}
+  </div>
+
+  <!-- INPUT BAR -->
+  <div class="chat-input-bar">
+    <form method="post" id="chatForm" style="display:flex;gap:0.75rem;flex:1;align-items:flex-end;">
+      {% csrf_token %}
+      <textarea name="body" id="chatInput" class="chat-input" placeholder="Type a message..." rows="1"
+        onkeydown="if(event.key==='Enter' && !event.shiftKey){event.preventDefault();sendMsg();}"></textarea>
+      <button type="button" class="chat-send-btn" onclick="sendMsg()"><i class="bi bi-send-fill"></i></button>
+    </form>
+  </div>
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+const chatMessages = document.getElementById('chatMessages');
+const chatInput = document.getElementById('chatInput');
+let lastMsgId = {{ msgs.last.pk|default:0 }};
+
+function scrollBottom() { chatMessages.scrollTop = chatMessages.scrollHeight; }
+scrollBottom();
+
+// Auto-resize textarea
+chatInput.addEventListener('input', function() {
+  this.style.height = 'auto';
+  this.style.height = Math.min(this.scrollHeight, 120) + 'px';
+});
+
+function addMsgBubble(msg, isMe) {
+  const wrap = document.createElement('div');
+  wrap.className = 'chat-msg ' + (isMe ? 'chat-msg-mine' : 'chat-msg-theirs');
+  wrap.dataset.id = msg.id;
+  wrap.innerHTML = `
+    <div class="chat-bubble">${msg.body.replace(/</g,'&lt;').replace(/>/g,'&gt;')}</div>
+    <div class="chat-time">${new Date(msg.sent_at).toLocaleString('en-IN',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'})}</div>
+  `;
+  chatMessages.appendChild(wrap);
+  scrollBottom();
+}
+
+function sendMsg() {
+  const body = chatInput.value.trim();
+  if (!body) return;
+  const formData = new FormData(document.getElementById('chatForm'));
+  fetch(window.location.href, {
+    method: 'POST',
+    headers: { 'X-Requested-With': 'XMLHttpRequest', 'X-CSRFToken': formData.get('csrfmiddlewaretoken') },
+    body: formData
+  }).then(() => {
+    addMsgBubble({ id: Date.now(), body: body, sent_at: new Date().toISOString() }, true);
+    chatInput.value = '';
+    chatInput.style.height = 'auto';
+  });
+}
+
+// Poll for new messages every 3 seconds
+setInterval(() => {
+  fetch(`{% url 'chat_messages_api' conv.pk %}?after=${lastMsgId}`)
+    .then(r => r.json())
+    .then(data => {
+      data.messages.forEach(msg => {
+        if (!document.querySelector(`[data-id="${msg.id}"]`)) {
+          const isMe = msg.sender__username === '{{ request.user.username }}';
+          addMsgBubble(msg, isMe);
+          lastMsgId = Math.max(lastMsgId, msg.id);
+        }
+      });
+    });
+}, 3000);
+</script>
+{% endblock %}

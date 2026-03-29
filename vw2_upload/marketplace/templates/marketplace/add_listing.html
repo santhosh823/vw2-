@@ -1,0 +1,427 @@
+{% extends 'marketplace/base.html' %}
+{% load static %}
+{% block title %}Add New Listing — Vehicle World{% endblock %}
+{% block nl_dash %}active{% endblock %}
+
+{% block extra_css %}
+<style>
+/* ── Upload zone styles ── */
+.upload-zone {
+  border: 2px dashed var(--border2);
+  border-radius: var(--r);
+  padding: 1.5rem 1rem;
+  text-align: center;
+  cursor: pointer;
+  transition: all var(--transition);
+  background: var(--bg3);
+  position: relative;
+  min-height: 160px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+.upload-zone:hover { border-color: rgba(255,77,0,0.6); background: rgba(255,77,0,0.04); }
+.upload-zone.has-file { border-color: rgba(34,197,94,0.5); background: rgba(34,197,94,0.04); }
+.upload-zone input[type=file] {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+  opacity: 0; cursor: pointer; z-index: 2;
+}
+.upload-zone .uz-icon { font-size: 2rem; margin-bottom: 0.5rem; pointer-events: none; }
+.upload-zone .uz-text { font-size: 0.82rem; color: var(--cream2); pointer-events: none; }
+.upload-zone .uz-hint { font-size: 0.72rem; color: var(--cream2); opacity: 0.6; margin-top: 0.25rem; pointer-events: none; }
+.upload-preview {
+  width: 100%; max-height: 180px;
+  object-fit: cover; border-radius: 6px;
+  border: 1px solid var(--border2); margin-top: 0.75rem;
+  display: none; pointer-events: none;
+}
+.upload-filename {
+  font-size: 0.72rem; color: var(--green2);
+  margin-top: 0.4rem; pointer-events: none;
+  word-break: break-all; display: none;
+}
+.upload-clear {
+  position: absolute; top: 8px; right: 8px;
+  background: rgba(248,113,113,0.15);
+  border: 1px solid rgba(248,113,113,0.3);
+  color: #f87171; border-radius: 50%;
+  width: 24px; height: 24px;
+  display: none; align-items: center;
+  justify-content: center; cursor: pointer;
+  font-size: 0.75rem; z-index: 3;
+}
+.upload-clear:hover { background: rgba(248,113,113,0.3); }
+.upload-zone.has-file .upload-clear { display: flex; }
+
+/* Required star */
+.req { color: var(--ember); }
+
+/* Section card */
+.form-section {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r2);
+  padding: 1.75rem;
+  margin-bottom: 1.5rem;
+}
+.form-section-title {
+  font-family: 'Syne', sans-serif;
+  font-weight: 700; font-size: 1rem;
+  color: var(--cream); margin-bottom: 1.5rem;
+  padding-bottom: 0.85rem;
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; gap: 0.5rem;
+}
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+.grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem; }
+@media(max-width: 640px) {
+  .grid-2, .grid-3 { grid-template-columns: 1fr; }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div class="container">
+    <div class="breadcrumb">
+      <a href="{% url 'home' %}">Home</a>
+      <span class="breadcrumb-sep">/</span>
+      <a href="{% url 'dashboard' %}">Dashboard</a>
+      <span class="breadcrumb-sep">/</span>
+      <span>Add Listing</span>
+    </div>
+    <h1 class="page-header-title">Add New Vehicle Listing</h1>
+    <p style="color:var(--cream2);font-size:0.88rem;margin-top:0.5rem;">
+      Fill in all the details below and upload photos to list your vehicle.
+    </p>
+  </div>
+</div>
+
+<div class="container" style="padding-top:2.5rem;padding-bottom:5rem;">
+  <div style="max-width:960px;margin:0 auto;">
+
+    {# KEY: enctype="multipart/form-data" is REQUIRED for file uploads to work #}
+    <form method="post" enctype="multipart/form-data" novalidate id="listingForm">
+      {% csrf_token %}
+
+      <div style="display:grid;grid-template-columns:1fr 400px;gap:2rem;">
+
+        <!-- ══ LEFT COLUMN ══ -->
+        <div>
+
+          <!-- BASIC INFO -->
+          <div class="form-section">
+            <div class="form-section-title">
+              <i class="bi bi-info-circle" style="color:var(--ember);"></i> Basic Information
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Listing Title <span class="req">*</span></label>
+              {{ form.title }}
+              {% if form.title.errors %}<div class="form-error">{{ form.title.errors.0 }}</div>{% endif %}
+              <div class="form-hint">Write a clear, descriptive title — e.g. "Honda Activa 6G 2023 — Excellent Condition"</div>
+            </div>
+
+            <div class="grid-2">
+              <div class="form-group">
+                <label class="form-label">Brand <span class="req">*</span></label>
+                {{ form.brand }}
+                {% if form.brand.errors %}<div class="form-error">{{ form.brand.errors.0 }}</div>{% endif %}
+              </div>
+              <div class="form-group">
+                <label class="form-label">Model <span class="req">*</span></label>
+                {{ form.model_name }}
+                {% if form.model_name.errors %}<div class="form-error">{{ form.model_name.errors.0 }}</div>{% endif %}
+              </div>
+            </div>
+
+            <div class="grid-2">
+              <div class="form-group">
+                <label class="form-label">Category <span class="req">*</span></label>
+                {{ form.category }}
+                {% if form.category.errors %}<div class="form-error">{{ form.category.errors.0 }}</div>{% endif %}
+              </div>
+              <div class="form-group">
+                <label class="form-label">Year <span class="req">*</span></label>
+                {{ form.year }}
+                {% if form.year.errors %}<div class="form-error">{{ form.year.errors.0 }}</div>{% endif %}
+              </div>
+            </div>
+
+            <div class="grid-2">
+              <div class="form-group">
+                <label class="form-label">Fuel Type <span class="req">*</span></label>
+                {{ form.fuel_type }}
+                {% if form.fuel_type.errors %}<div class="form-error">{{ form.fuel_type.errors.0 }}</div>{% endif %}
+              </div>
+              <div class="form-group">
+                <label class="form-label">Condition <span class="req">*</span></label>
+                {{ form.condition }}
+                {% if form.condition.errors %}<div class="form-error">{{ form.condition.errors.0 }}</div>{% endif %}
+              </div>
+            </div>
+
+            <div class="grid-2">
+              <div class="form-group">
+                <label class="form-label">Mileage <span class="req">*</span></label>
+                {{ form.mileage }}
+                {% if form.mileage.errors %}<div class="form-error">{{ form.mileage.errors.0 }}</div>{% endif %}
+              </div>
+              <div class="form-group">
+                <label class="form-label">KM Driven</label>
+                {{ form.km_driven }}
+                <div class="form-hint">Enter 0 for brand new vehicles</div>
+              </div>
+            </div>
+
+            <div class="grid-2">
+              <div class="form-group">
+                <label class="form-label">Color</label>
+                {{ form.color }}
+              </div>
+              <div class="form-group">
+                <label class="form-label">Engine Capacity</label>
+                {{ form.engine_cc }}
+              </div>
+            </div>
+          </div>
+
+          <!-- PRICING -->
+          <div class="form-section">
+            <div class="form-section-title">
+              <i class="bi bi-currency-rupee" style="color:var(--gold2);"></i> Pricing
+            </div>
+
+            <div class="grid-2">
+              <div class="form-group">
+                <label class="form-label">Asking Price (₹) <span class="req">*</span></label>
+                {{ form.price }}
+                {% if form.price.errors %}<div class="form-error">{{ form.price.errors.0 }}</div>{% endif %}
+              </div>
+              <div class="form-group">
+                <label class="form-label">Original / MRP Price (₹)</label>
+                {{ form.original_price }}
+                <div class="form-hint">Used to show savings % badge</div>
+              </div>
+            </div>
+
+            <div style="display:flex;align-items:center;gap:0.75rem;padding:0.75rem;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r);">
+              {{ form.is_negotiable }}
+              <label style="font-size:0.88rem;color:var(--cream2);cursor:pointer;">
+                Price is negotiable — buyers can make offers
+              </label>
+            </div>
+          </div>
+
+          <!-- DESCRIPTION -->
+          <div class="form-section">
+            <div class="form-section-title">
+              <i class="bi bi-card-text" style="color:var(--cobalt2);"></i> Description
+            </div>
+            <div class="form-group">
+              <label class="form-label">Vehicle Description</label>
+              {{ form.description }}
+              <div class="form-hint">Describe condition, features, service history, reason for selling, etc.</div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- ══ RIGHT COLUMN — PHOTOS ══ -->
+        <div>
+          <div class="form-section" style="position:sticky;top:80px;">
+            <div class="form-section-title">
+              <i class="bi bi-images" style="color:var(--ember);"></i> Vehicle Photos
+            </div>
+            <p style="font-size:0.82rem;color:var(--cream2);margin-bottom:1.25rem;">
+              Upload up to 3 photos. Clear, well-lit photos get more enquiries!
+            </p>
+
+            <!-- MAIN PHOTO -->
+            <div class="form-group">
+              <label class="form-label">Main Photo <span class="req">*</span></label>
+              <div class="upload-zone" id="zone1">
+                <div class="upload-clear" id="clear1" onclick="clearUpload('zone1','preview1','fname1','{{ form.image.html_name }}',event)">×</div>
+                {{ form.image }}
+                <div class="uz-icon">📷</div>
+                <div class="uz-text">Click or drag photo here</div>
+                <div class="uz-hint">JPG, PNG, WEBP · Max 5MB</div>
+                <img class="upload-preview" id="preview1" src="" alt="Preview">
+                <div class="upload-filename" id="fname1"></div>
+              </div>
+              {% if form.image.errors %}<div class="form-error">{{ form.image.errors.0 }}</div>{% endif %}
+            </div>
+
+            <!-- PHOTO 2 -->
+            <div class="form-group">
+              <label class="form-label">Photo 2 <span style="color:var(--cream2);font-size:0.72rem;">(optional)</span></label>
+              <div class="upload-zone" id="zone2">
+                <div class="upload-clear" id="clear2" onclick="clearUpload('zone2','preview2','fname2','{{ form.image2.html_name }}',event)">×</div>
+                {{ form.image2 }}
+                <div class="uz-icon">📷</div>
+                <div class="uz-text">Click or drag photo here</div>
+                <div class="uz-hint">JPG, PNG, WEBP · Max 5MB</div>
+                <img class="upload-preview" id="preview2" src="" alt="Preview">
+                <div class="upload-filename" id="fname2"></div>
+              </div>
+            </div>
+
+            <!-- PHOTO 3 -->
+            <div class="form-group">
+              <label class="form-label">Photo 3 <span style="color:var(--cream2);font-size:0.72rem;">(optional)</span></label>
+              <div class="upload-zone" id="zone3">
+                <div class="upload-clear" id="clear3" onclick="clearUpload('zone3','preview3','fname3','{{ form.image3.html_name }}',event)">×</div>
+                {{ form.image3 }}
+                <div class="uz-icon">📷</div>
+                <div class="uz-text">Click or drag photo here</div>
+                <div class="uz-hint">JPG, PNG, WEBP · Max 5MB</div>
+                <img class="upload-preview" id="preview3" src="" alt="Preview">
+                <div class="upload-filename" id="fname3"></div>
+              </div>
+            </div>
+
+            <!-- TIPS -->
+            <div style="background:rgba(34,197,94,0.06);border:1px solid rgba(34,197,94,0.15);border-radius:var(--r);padding:1rem;font-size:0.8rem;color:var(--cream2);margin-top:0.5rem;">
+              <div style="font-weight:700;color:var(--green2);margin-bottom:0.5rem;">📸 Photo Tips</div>
+              <ul style="padding-left:1rem;line-height:1.9;">
+                <li>Shoot in natural daylight</li>
+                <li>Include front, side and interior views</li>
+                <li>Show any scratches or dents honestly</li>
+                <li>Clean the vehicle before photographing</li>
+              </ul>
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+
+      <!-- SUBMIT BUTTONS -->
+      <div style="display:flex;gap:1rem;margin-top:2rem;flex-wrap:wrap;">
+        <button type="submit" class="btn btn-ember btn-lg" style="min-width:200px;justify-content:center;">
+          <i class="bi bi-check-circle-fill"></i> Publish Listing
+        </button>
+        <a href="{% url 'dashboard' %}" class="btn btn-ghost btn-lg">
+          Cancel
+        </a>
+      </div>
+
+    </form>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+/**
+ * Sets up drag-and-drop / click-to-upload for an upload zone.
+ * zoneId    - ID of the .upload-zone div
+ * previewId - ID of the <img> element for preview
+ * fnameId   - ID of the filename display element
+ */
+function setupUploadZone(zoneId, previewId, fnameId) {
+  const zone    = document.getElementById(zoneId);
+  const preview = document.getElementById(previewId);
+  const fname   = document.getElementById(fnameId);
+  // The file input is the first <input type="file"> inside the zone
+  const input   = zone.querySelector('input[type="file"]');
+  if (!input) return;
+
+  input.addEventListener('change', function() {
+    const file = this.files[0];
+    if (!file) return;
+
+    // Show filename
+    fname.textContent = '✓ ' + file.name;
+    fname.style.display = 'block';
+
+    // Show image preview
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      preview.src = e.target.result;
+      preview.style.display = 'block';
+    };
+    reader.readAsDataURL(file);
+
+    // Mark zone as having a file
+    zone.classList.add('has-file');
+
+    // Update upload zone text
+    const uzText = zone.querySelector('.uz-text');
+    if (uzText) uzText.textContent = 'Photo selected ✓';
+  });
+
+  // Drag and drop support
+  zone.addEventListener('dragover', function(e) {
+    e.preventDefault();
+    this.style.borderColor = 'rgba(255,77,0,0.8)';
+  });
+  zone.addEventListener('dragleave', function() {
+    this.style.borderColor = '';
+  });
+  zone.addEventListener('drop', function(e) {
+    e.preventDefault();
+    this.style.borderColor = '';
+    const dt = e.dataTransfer;
+    if (dt.files.length > 0) {
+      // Create a new DataTransfer to assign to the file input
+      const transfer = new DataTransfer();
+      transfer.items.add(dt.files[0]);
+      input.files = transfer.files;
+      // Trigger change event manually
+      input.dispatchEvent(new Event('change'));
+    }
+  });
+}
+
+/**
+ * Clears a file upload zone — removes the preview and resets the input.
+ */
+function clearUpload(zoneId, previewId, fnameId, inputName, event) {
+  event.stopPropagation(); // don't open file picker when clicking ×
+  const zone    = document.getElementById(zoneId);
+  const preview = document.getElementById(previewId);
+  const fname   = document.getElementById(fnameId);
+  const input   = zone.querySelector('input[type="file"]');
+
+  if (input) input.value = '';
+  if (preview) { preview.src = ''; preview.style.display = 'none'; }
+  if (fname)   { fname.textContent = ''; fname.style.display = 'none'; }
+
+  zone.classList.remove('has-file');
+  zone.style.borderColor = '';
+
+  const uzText = zone.querySelector('.uz-text');
+  if (uzText) uzText.textContent = 'Click or drag photo here';
+}
+
+// Initialise all three upload zones
+setupUploadZone('zone1', 'preview1', 'fname1');
+setupUploadZone('zone2', 'preview2', 'fname2');
+setupUploadZone('zone3', 'preview3', 'fname3');
+
+// Basic client-side validation before submit
+document.getElementById('listingForm').addEventListener('submit', function(e) {
+  const title    = document.querySelector('[name="title"]').value.trim();
+  const brand    = document.querySelector('[name="brand"]').value.trim();
+  const price    = document.querySelector('[name="price"]').value.trim();
+  const category = document.querySelector('[name="category"]').value;
+
+  if (!title || !brand || !price || !category) {
+    e.preventDefault();
+    alert('Please fill in all required fields (Title, Brand, Category, Price).');
+    return;
+  }
+
+  // Show loading state on button
+  const btn = this.querySelector('button[type="submit"]');
+  btn.disabled = true;
+  btn.innerHTML = '<span style="display:inline-block;width:16px;height:16px;border:2px solid rgba(255,255,255,0.3);border-top-color:white;border-radius:50%;animation:spin 0.7s linear infinite;margin-right:0.5rem;"></span> Publishing...';
+});
+</script>
+<style>
+@keyframes spin { to { transform: rotate(360deg); } }
+</style>
+{% endblock %}

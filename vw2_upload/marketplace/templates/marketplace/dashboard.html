@@ -1,0 +1,231 @@
+{% extends 'marketplace/base.html' %}
+{% block title %}Seller Dashboard — Vehicle World{% endblock %}
+{% block nl_dash %}active{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div class="container">
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem;">
+      <div>
+        <div style="font-family:'DM Mono',monospace;font-size:0.7rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--ember);margin-bottom:0.4rem;">Seller Dashboard</div>
+        <h1 class="page-header-title">Welcome, {{ seller.name }}</h1>
+      </div>
+      <a href="{% url 'add_listing' %}" class="btn btn-ember btn-lg"><i class="bi bi-plus-lg"></i> Add New Listing</a>
+    </div>
+  </div>
+</div>
+
+<div class="container" style="padding-top:2.5rem;padding-bottom:4rem;">
+
+  <!-- STATS GRID -->
+  <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-bottom:2.5rem;">
+    <div class="dash-stat"><div class="dash-stat-n" style="color:var(--cream);">{{ stats.total }}</div><div class="dash-stat-l">Total Listings</div></div>
+    <div class="dash-stat"><div class="dash-stat-n" style="color:var(--green2);">{{ stats.active }}</div><div class="dash-stat-l">Active</div></div>
+    <div class="dash-stat"><div class="dash-stat-n" style="color:#f87171;">{{ stats.sold }}</div><div class="dash-stat-l">Sold</div></div>
+    <div class="dash-stat"><div class="dash-stat-n" style="color:var(--gold2);">{{ stats.featured }}</div><div class="dash-stat-l">Featured</div></div>
+    <div class="dash-stat"><div class="dash-stat-n" style="color:var(--cobalt2);">{{ stats.views }}</div><div class="dash-stat-l">Total Views</div></div>
+    <div class="dash-stat"><div class="dash-stat-n" style="color:var(--ember);">{{ stats.enquiries }}</div><div class="dash-stat-l">Enquiries</div></div>
+    <a href="{% url 'inbox' %}" class="dash-stat" style="text-decoration:none;border-color:{% if stats.unread_msgs %}rgba(255,77,0,0.3){% else %}var(--border){% endif %};">
+      <div class="dash-stat-n" style="color:{% if stats.unread_msgs %}var(--ember){% else %}var(--cream){% endif %};">{{ stats.unread_msgs }}</div>
+      <div class="dash-stat-l">Unread Messages</div>
+    </a>
+    <div class="dash-stat"><div class="dash-stat-n" style="color:#fbbf24;">{{ stats.pending_req }}</div><div class="dash-stat-l">Pending Requests</div></div>
+  </div>
+
+  <!-- SELLER-ONLY QUICK ACTIONS -->
+  <div style="display:flex;gap:0.75rem;flex-wrap:wrap;margin-bottom:2.5rem;">
+    <a href="{% url 'add_listing' %}" class="btn btn-ember"><i class="bi bi-plus-circle"></i> Add Listing</a>
+    <a href="{% url 'inbox' %}" class="btn btn-ghost"><i class="bi bi-chat-dots"></i> Message Inbox</a>
+    <a href="{% url 'seller_profile' seller.pk %}" class="btn btn-ghost"><i class="bi bi-person"></i> My Profile</a>
+  </div>
+
+  <!-- GRAPHS ROW -->
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;margin-bottom:2.5rem;">
+    <!-- Bar Chart — Listings per Month -->
+    <div class="graph-card">
+      <div class="graph-title"><i class="bi bi-bar-chart-fill" style="color:var(--ember);"></i> Listings per Month</div>
+      <div class="graph-canvas-wrap">
+        <canvas id="listingsChart"></canvas>
+      </div>
+    </div>
+    <!-- Bar Chart — Top Vehicle Views -->
+    <div class="graph-card">
+      <div class="graph-title"><i class="bi bi-eye-fill" style="color:var(--cobalt2);"></i> Top Viewed Vehicles</div>
+      <div class="graph-canvas-wrap">
+        <canvas id="viewsChart"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <div style="display:grid;grid-template-columns:1fr 380px;gap:2rem;align-items:start;">
+
+    <!-- LISTINGS TABLE -->
+    <div class="card-panel" style="padding:0;overflow:hidden;">
+      <div style="padding:1.25rem 1.5rem;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;">
+        <h3 style="font-family:'Syne',sans-serif;font-weight:700;font-size:1rem;color:var(--cream);">My Listings</h3>
+        <a href="{% url 'add_listing' %}" class="btn btn-ember btn-sm"><i class="bi bi-plus"></i> Add</a>
+      </div>
+      {% if vehicles %}
+      <table class="dash-table">
+        <thead><tr><th>Vehicle</th><th>Price</th><th>Status</th><th>Views</th><th>Actions</th></tr></thead>
+        <tbody>
+        {% for v in vehicles %}
+        <tr>
+          <td>
+            <div style="display:flex;align-items:center;gap:0.75rem;">
+              <div style="width:46px;height:46px;border-radius:6px;overflow:hidden;background:var(--bg4);display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0;border:1px solid var(--border);">
+                {% if v.image %}<img src="{{ v.image.url }}" style="width:100%;height:100%;object-fit:cover;" alt="">
+                {% elif v.category.slug == 'two_wheeler' %}🏍️{% elif v.category.slug == 'three_wheeler' %}🛺{% else %}🚗{% endif %}
+              </div>
+              <div>
+                <div style="font-family:'Syne',sans-serif;font-weight:600;font-size:0.88rem;color:var(--cream);">{{ v.brand }} {{ v.model_name }}</div>
+                <div style="font-family:'DM Mono',monospace;font-size:0.65rem;color:var(--cream2);">{{ v.year }} · {{ v.get_fuel_type_display }}</div>
+              </div>
+            </div>
+          </td>
+          <td style="font-family:'Syne',sans-serif;font-weight:700;color:var(--cream);">{{ v.formatted_price }}</td>
+          <td>
+            <span class="status-pill status-{{ v.status }}">{{ v.get_status_display }}</span>
+            {% if v.is_featured %}<span style="color:var(--gold2);font-size:0.75rem;margin-left:0.3rem;">⭐</span>{% endif %}
+          </td>
+          <td style="font-family:'DM Mono',monospace;font-size:0.75rem;color:var(--cream2);">{{ v.views_count }}</td>
+          <td>
+            <div style="display:flex;gap:0.35rem;flex-wrap:wrap;">
+              <a class="action-btn action-view" href="{% url 'vehicle_detail' v.pk %}">View</a>
+              <a class="action-btn action-edit" href="{% url 'edit_listing' v.pk %}">Edit</a>
+              {% if v.status == 'active' %}<a class="action-btn action-sold" href="{% url 'mark_sold' v.pk %}">Sold</a>{% endif %}
+              <a class="action-btn action-del" href="{% url 'delete_listing' v.pk %}">Del</a>
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+        </tbody>
+      </table>
+      {% else %}
+      <div class="empty-state"><div class="empty-icon">🚗</div><div class="empty-title">No listings yet</div>
+        <a href="{% url 'add_listing' %}" class="btn btn-ember" style="margin-top:1rem;">+ Add Listing</a></div>
+      {% endif %}
+    </div>
+
+    <!-- RIGHT COLUMN -->
+    <div style="display:flex;flex-direction:column;gap:1.25rem;">
+
+      <!-- BOOKING REQUESTS -->
+      <div class="card-panel" style="padding:0;overflow:hidden;">
+        <div style="padding:1.1rem 1.25rem;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;">
+          <h3 style="font-family:'Syne',sans-serif;font-weight:700;font-size:0.95rem;color:var(--cream);">
+            <i class="bi bi-calendar-check" style="color:var(--ember);"></i> Booking Requests
+          </h3>
+          {% if stats.pending_req %}
+          <span class="req-status req-pending">{{ stats.pending_req }} pending</span>
+          {% endif %}
+        </div>
+        <div style="padding:0.75rem;">
+          {% for req in booking_requests %}
+          <div class="booking-req-card">
+            <div style="flex:1;">
+              <div style="font-family:'Syne',sans-serif;font-weight:600;font-size:0.85rem;color:var(--cream);">{{ req.buyer.get_full_name|default:req.buyer.username }}</div>
+              <div style="font-family:'DM Mono',monospace;font-size:0.65rem;color:var(--cream2);">{{ req.vehicle.brand }} {{ req.vehicle.model_name }}</div>
+              {% if req.message %}<div style="font-size:0.78rem;color:var(--cream2);margin-top:0.25rem;">{{ req.message|truncatechars:50 }}</div>{% endif %}
+            </div>
+            <span class="req-status req-{{ req.status }}">{{ req.get_status_display }}</span>
+            {% if req.status == 'pending' %}
+            <div style="display:flex;gap:0.35rem;">
+              <form method="post" action="{% url 'update_booking_request' req.pk %}" style="display:inline;">
+                {% csrf_token %}<input type="hidden" name="status" value="accepted">
+                <button type="submit" class="action-btn action-sold" style="border:none;cursor:pointer;">✓</button>
+              </form>
+              <form method="post" action="{% url 'update_booking_request' req.pk %}" style="display:inline;">
+                {% csrf_token %}<input type="hidden" name="status" value="rejected">
+                <button type="submit" class="action-btn action-del" style="border:none;cursor:pointer;">✗</button>
+              </form>
+            </div>
+            {% endif %}
+          </div>
+          {% empty %}
+          <div style="padding:1.5rem;text-align:center;color:var(--cream2);font-size:0.85rem;">No booking requests yet</div>
+          {% endfor %}
+        </div>
+      </div>
+
+      <!-- RECENT ENQUIRIES -->
+      <div class="card-panel" style="padding:0;overflow:hidden;">
+        <div style="padding:1.1rem 1.25rem;border-bottom:1px solid var(--border);">
+          <h3 style="font-family:'Syne',sans-serif;font-weight:700;font-size:0.95rem;color:var(--cream);">
+            <i class="bi bi-envelope" style="color:var(--cobalt2);"></i> Recent Enquiries
+          </h3>
+        </div>
+        <div style="padding:0.75rem;">
+          {% for e in enquiries %}
+          <div style="padding:0.85rem;border-radius:6px;border:1px solid var(--border);margin-bottom:0.5rem;background:var(--bg3);">
+            <div style="font-family:'Syne',sans-serif;font-weight:600;font-size:0.85rem;color:var(--cream);">{{ e.name }}</div>
+            <div style="font-family:'DM Mono',monospace;font-size:0.65rem;color:var(--cream2);margin:0.15rem 0;">{{ e.vehicle.title|truncatechars:35 }}</div>
+            <div style="font-size:0.78rem;color:var(--cream2);line-height:1.5;">{{ e.message|truncatechars:60 }}</div>
+            <div style="display:flex;gap:0.75rem;margin-top:0.5rem;">
+              <a href="tel:{{ e.phone }}" style="font-family:'DM Mono',monospace;font-size:0.62rem;color:var(--green2);text-decoration:none;">📞 {{ e.phone }}</a>
+              <a href="mailto:{{ e.email }}" style="font-family:'DM Mono',monospace;font-size:0.62rem;color:var(--cobalt2);text-decoration:none;">✉️ Email</a>
+            </div>
+          </div>
+          {% empty %}
+          <div style="padding:1.5rem;text-align:center;color:var(--cream2);font-size:0.85rem;">No enquiries yet</div>
+          {% endfor %}
+        </div>
+      </div>
+
+    </div><!-- end right column -->
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+const chartDefaults = {
+  plugins: { legend: { display: false } },
+  scales: {
+    x: { ticks: { color: '#B8B6B0', font: { family: 'DM Mono, monospace', size: 10 } }, grid: { color: 'rgba(255,255,255,0.05)' } },
+    y: { ticks: { color: '#B8B6B0', font: { family: 'DM Mono, monospace', size: 10 }, stepSize: 1 }, grid: { color: 'rgba(255,255,255,0.05)' }, beginAtZero: true }
+  },
+  responsive: true, maintainAspectRatio: false,
+};
+
+// Listings per Month — Bar Chart
+new Chart(document.getElementById('listingsChart'), {
+  type: 'bar',
+  data: {
+    labels: {{ chart_labels|safe }},
+    datasets: [{
+      label: 'Listings',
+      data: {{ chart_data|safe }},
+      backgroundColor: 'rgba(255,77,0,0.5)',
+      borderColor: 'rgba(255,77,0,0.9)',
+      borderWidth: 2, borderRadius: 6,
+    }]
+  },
+  options: { ...chartDefaults }
+});
+
+// Top Views — Horizontal Bar Chart
+new Chart(document.getElementById('viewsChart'), {
+  type: 'bar',
+  data: {
+    labels: {{ views_labels|safe }},
+    datasets: [{
+      label: 'Views',
+      data: {{ views_data|safe }},
+      backgroundColor: 'rgba(37,99,235,0.5)',
+      borderColor: 'rgba(37,99,235,0.9)',
+      borderWidth: 2, borderRadius: 6,
+    }]
+  },
+  options: {
+    ...chartDefaults,
+    indexAxis: 'y',
+    scales: {
+      x: { ticks: { color: '#B8B6B0', font: { family: 'DM Mono, monospace', size: 10 } }, grid: { color: 'rgba(255,255,255,0.05)' }, beginAtZero: true },
+      y: { ticks: { color: '#B8B6B0', font: { family: 'DM Mono, monospace', size: 9 } }, grid: { display: false } }
+    }
+  }
+});
+</script>
+{% endblock %}

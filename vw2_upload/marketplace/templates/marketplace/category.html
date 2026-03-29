@@ -1,0 +1,41 @@
+{% extends 'marketplace/base.html' %}
+{% block title %}{{ cat.name }} — Vehicle World{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div class="container">
+    <div class="breadcrumb"><a href="{% url 'home' %}">Home</a><span class="breadcrumb-sep">/</span><span>{{ cat.name }}</span></div>
+    <h1 class="page-header-title">{{ cat.icon }} {{ cat.name }}</h1>
+    <p style="color:var(--cream2);font-size:0.88rem;margin-top:0.4rem;font-family:'DM Mono',monospace;">{{ vehicles.count }} listings available</p>
+  </div>
+</div>
+
+<section class="section">
+  <div class="container">
+    <!-- Category tabs — all three types always visible -->
+    <div class="cat-tabs">
+      <a href="{% url 'category' 'two_wheeler' %}" class="cat-tab {% if cat.slug == 'two_wheeler' %}active{% endif %}">
+        <span class="cat-tab-icon">🏍️</span> Two Wheeler
+      </a>
+      <a href="{% url 'category' 'three_wheeler' %}" class="cat-tab {% if cat.slug == 'three_wheeler' %}active{% endif %}">
+        <span class="cat-tab-icon">🛺</span> Three Wheeler
+      </a>
+      <a href="{% url 'category' 'four_wheeler' %}" class="cat-tab {% if cat.slug == 'four_wheeler' %}active{% endif %}">
+        <span class="cat-tab-icon">🚗</span> Four Wheeler
+      </a>
+    </div>
+
+    {% if vehicles %}
+    <div class="grid-auto">
+      {% for v in vehicles %}{% include 'marketplace/partials/vcard.html' with vehicle=v show_new=1 %}{% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-state">
+      <div class="empty-icon">{{ cat.icon }}</div>
+      <div class="empty-title">No listings in this category</div>
+      <a href="{% url 'listings' %}" class="btn btn-ember" style="margin-top:1rem;">Browse All</a>
+    </div>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}

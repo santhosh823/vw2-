@@ -1,0 +1,223 @@
+{% extends 'marketplace/base.html' %}
+{% load static %}
+{% block title %}Edit Listing — {{ v.title }}{% endblock %}
+{% block nl_dash %}active{% endblock %}
+
+{% block extra_css %}
+<style>
+.upload-zone {
+  border: 2px dashed var(--border2); border-radius: var(--r);
+  padding: 1.25rem 1rem; text-align: center; cursor: pointer;
+  transition: all var(--transition); background: var(--bg3);
+  position: relative; min-height: 140px;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+}
+.upload-zone:hover { border-color: rgba(255,77,0,0.6); background: rgba(255,77,0,0.04); }
+.upload-zone.has-file { border-color: rgba(34,197,94,0.5); background: rgba(34,197,94,0.04); }
+.upload-zone input[type=file] { position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer;z-index:2; }
+.uz-icon { font-size: 1.75rem; margin-bottom: 0.4rem; pointer-events: none; }
+.uz-text { font-size: 0.78rem; color: var(--cream2); pointer-events: none; }
+.upload-preview { width:100%;max-height:150px;object-fit:cover;border-radius:6px;border:1px solid var(--border2);margin-top:0.6rem;display:none;pointer-events:none; }
+.upload-filename { font-size:0.7rem;color:var(--green2);margin-top:0.3rem;pointer-events:none;word-break:break-all;display:none; }
+.upload-clear { position:absolute;top:6px;right:6px;background:rgba(248,113,113,0.15);border:1px solid rgba(248,113,113,0.3);color:#f87171;border-radius:50%;width:22px;height:22px;display:none;align-items:center;justify-content:center;cursor:pointer;font-size:0.72rem;z-index:3; }
+.upload-zone.has-file .upload-clear { display:flex; }
+.current-img-wrap { position:relative;margin-bottom:0.75rem; }
+.current-img { width:100%;height:100px;object-fit:cover;border-radius:6px;border:1px solid var(--border2); }
+.current-img-label { font-family:'DM Mono',monospace;font-size:0.62rem;letter-spacing:0.08em;text-transform:uppercase;color:var(--cream2);margin-bottom:0.4rem;display:block; }
+.form-section { background:var(--surface);border:1px solid var(--border);border-radius:var(--r2);padding:1.5rem;margin-bottom:1.25rem; }
+.form-section-title { font-family:'Syne',sans-serif;font-weight:700;font-size:1rem;color:var(--cream);margin-bottom:1.25rem;padding-bottom:0.75rem;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:0.5rem; }
+.grid-2 { display:grid;grid-template-columns:1fr 1fr;gap:1rem; }
+@media(max-width:640px) { .grid-2 { grid-template-columns:1fr; } }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div class="container">
+    <div class="breadcrumb">
+      <a href="{% url 'dashboard' %}">Dashboard</a>
+      <span class="breadcrumb-sep">/</span>
+      <span>Edit Listing</span>
+    </div>
+    <h1 class="page-header-title">Edit: {{ v.brand }} {{ v.model_name }}</h1>
+  </div>
+</div>
+
+<div class="container" style="padding-top:2.5rem;padding-bottom:5rem;">
+  <div style="max-width:960px;margin:0 auto;">
+
+    <form method="post" enctype="multipart/form-data" novalidate id="editForm">
+      {% csrf_token %}
+
+      <div style="display:grid;grid-template-columns:1fr 400px;gap:2rem;">
+
+        <!-- LEFT -->
+        <div>
+          <div class="form-section">
+            <div class="form-section-title"><i class="bi bi-info-circle" style="color:var(--ember);"></i> Basic Information</div>
+            <div class="form-group"><label class="form-label">Title</label>{{ form.title }}{% if form.title.errors %}<div class="form-error">{{ form.title.errors.0 }}</div>{% endif %}</div>
+            <div class="grid-2">
+              <div class="form-group"><label class="form-label">Brand</label>{{ form.brand }}</div>
+              <div class="form-group"><label class="form-label">Model</label>{{ form.model_name }}</div>
+            </div>
+            <div class="grid-2">
+              <div class="form-group"><label class="form-label">Category</label>{{ form.category }}</div>
+              <div class="form-group"><label class="form-label">Year</label>{{ form.year }}</div>
+            </div>
+            <div class="grid-2">
+              <div class="form-group"><label class="form-label">Fuel Type</label>{{ form.fuel_type }}</div>
+              <div class="form-group"><label class="form-label">Condition</label>{{ form.condition }}</div>
+            </div>
+            <div class="grid-2">
+              <div class="form-group"><label class="form-label">Mileage</label>{{ form.mileage }}</div>
+              <div class="form-group"><label class="form-label">KM Driven</label>{{ form.km_driven }}</div>
+            </div>
+            <div class="grid-2">
+              <div class="form-group"><label class="form-label">Color</label>{{ form.color }}</div>
+              <div class="form-group"><label class="form-label">Engine</label>{{ form.engine_cc }}</div>
+            </div>
+          </div>
+
+          <div class="form-section">
+            <div class="form-section-title"><i class="bi bi-currency-rupee" style="color:var(--gold2);"></i> Pricing</div>
+            <div class="grid-2">
+              <div class="form-group"><label class="form-label">Asking Price (₹)</label>{{ form.price }}{% if form.price.errors %}<div class="form-error">{{ form.price.errors.0 }}</div>{% endif %}</div>
+              <div class="form-group"><label class="form-label">Original / MRP (₹)</label>{{ form.original_price }}</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:0.75rem;padding:0.75rem;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r);">
+              {{ form.is_negotiable }}
+              <label style="font-size:0.88rem;color:var(--cream2);cursor:pointer;">Price is negotiable</label>
+            </div>
+          </div>
+
+          <div class="form-section">
+            <div class="form-section-title"><i class="bi bi-card-text" style="color:var(--cobalt2);"></i> Description</div>
+            <div class="form-group">{{ form.description }}</div>
+          </div>
+        </div>
+
+        <!-- RIGHT — PHOTOS -->
+        <div>
+          <div class="form-section" style="position:sticky;top:80px;">
+            <div class="form-section-title"><i class="bi bi-images" style="color:var(--ember);"></i> Photos</div>
+            <p style="font-size:0.8rem;color:var(--cream2);margin-bottom:1.25rem;">
+              Upload new photos to replace existing ones, or leave blank to keep current photos.
+            </p>
+
+            <!-- MAIN PHOTO -->
+            <div class="form-group">
+              <label class="form-label">Main Photo</label>
+              {% if v.image %}
+              <div class="current-img-wrap">
+                <span class="current-img-label">Current photo:</span>
+                <img src="{{ v.image.url }}" alt="{{ v.title }}" class="current-img">
+              </div>
+              {% endif %}
+              <div class="upload-zone" id="zone1">
+                <div class="upload-clear" onclick="clearUpload('zone1','preview1','fname1',event)">×</div>
+                {{ form.image }}
+                <div class="uz-icon">🔄</div>
+                <div class="uz-text">{% if v.image %}Replace photo{% else %}Upload photo{% endif %}</div>
+                <img class="upload-preview" id="preview1" src="" alt="">
+                <div class="upload-filename" id="fname1"></div>
+              </div>
+              {% if form.image.errors %}<div class="form-error">{{ form.image.errors.0 }}</div>{% endif %}
+            </div>
+
+            <!-- PHOTO 2 -->
+            <div class="form-group">
+              <label class="form-label">Photo 2</label>
+              {% if v.image2 %}<div class="current-img-wrap"><span class="current-img-label">Current:</span><img src="{{ v.image2.url }}" alt="" class="current-img"></div>{% endif %}
+              <div class="upload-zone" id="zone2">
+                <div class="upload-clear" onclick="clearUpload('zone2','preview2','fname2',event)">×</div>
+                {{ form.image2 }}
+                <div class="uz-icon">🔄</div>
+                <div class="uz-text">{% if v.image2 %}Replace{% else %}Add photo{% endif %}</div>
+                <img class="upload-preview" id="preview2" src="" alt="">
+                <div class="upload-filename" id="fname2"></div>
+              </div>
+            </div>
+
+            <!-- PHOTO 3 -->
+            <div class="form-group">
+              <label class="form-label">Photo 3</label>
+              {% if v.image3 %}<div class="current-img-wrap"><span class="current-img-label">Current:</span><img src="{{ v.image3.url }}" alt="" class="current-img"></div>{% endif %}
+              <div class="upload-zone" id="zone3">
+                <div class="upload-clear" onclick="clearUpload('zone3','preview3','fname3',event)">×</div>
+                {{ form.image3 }}
+                <div class="uz-icon">🔄</div>
+                <div class="uz-text">{% if v.image3 %}Replace{% else %}Add photo{% endif %}</div>
+                <img class="upload-preview" id="preview3" src="" alt="">
+                <div class="upload-filename" id="fname3"></div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+
+      <!-- BUTTONS -->
+      <div style="display:flex;gap:1rem;margin-top:2rem;flex-wrap:wrap;">
+        <button type="submit" class="btn btn-ember btn-lg" style="min-width:180px;justify-content:center;">
+          <i class="bi bi-check-circle-fill"></i> Save Changes
+        </button>
+        <a href="{% url 'vehicle_detail' v.pk %}" class="btn btn-ghost btn-lg" target="_blank">
+          <i class="bi bi-eye"></i> Preview
+        </a>
+        <a href="{% url 'dashboard' %}" class="btn btn-ghost btn-lg">Cancel</a>
+      </div>
+    </form>
+
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function setupUploadZone(zoneId, previewId, fnameId) {
+  const zone    = document.getElementById(zoneId);
+  const preview = document.getElementById(previewId);
+  const fname   = document.getElementById(fnameId);
+  const input   = zone.querySelector('input[type="file"]');
+  if (!input) return;
+  input.addEventListener('change', function() {
+    const file = this.files[0];
+    if (!file) return;
+    fname.textContent = '✓ ' + file.name;
+    fname.style.display = 'block';
+    const reader = new FileReader();
+    reader.onload = e => { preview.src = e.target.result; preview.style.display = 'block'; };
+    reader.readAsDataURL(file);
+    zone.classList.add('has-file');
+    const t = zone.querySelector('.uz-text');
+    if (t) t.textContent = 'New photo selected ✓';
+  });
+  zone.addEventListener('dragover', e => { e.preventDefault(); zone.style.borderColor = 'rgba(255,77,0,0.8)'; });
+  zone.addEventListener('dragleave', () => { zone.style.borderColor = ''; });
+  zone.addEventListener('drop', e => {
+    e.preventDefault(); zone.style.borderColor = '';
+    if (e.dataTransfer.files.length) {
+      const t = new DataTransfer(); t.items.add(e.dataTransfer.files[0]);
+      input.files = t.files; input.dispatchEvent(new Event('change'));
+    }
+  });
+}
+function clearUpload(zoneId, previewId, fnameId, event) {
+  event.stopPropagation();
+  const zone = document.getElementById(zoneId);
+  const preview = document.getElementById(previewId);
+  const fname   = document.getElementById(fnameId);
+  const input   = zone.querySelector('input[type="file"]');
+  if (input) input.value = '';
+  if (preview) { preview.src = ''; preview.style.display = 'none'; }
+  if (fname)   { fname.textContent = ''; fname.style.display = 'none'; }
+  zone.classList.remove('has-file'); zone.style.borderColor = '';
+  const t = zone.querySelector('.uz-text'); if (t) t.textContent = 'Replace photo';
+}
+setupUploadZone('zone1','preview1','fname1');
+setupUploadZone('zone2','preview2','fname2');
+setupUploadZone('zone3','preview3','fname3');
+</script>
+<style>@keyframes spin{to{transform:rotate(360deg);}}</style>
+{% endblock %}

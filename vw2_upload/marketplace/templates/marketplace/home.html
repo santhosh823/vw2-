@@ -1,0 +1,311 @@
+{% extends 'marketplace/base.html' %}
+{% load static %}
+{% block title %}Vehicle World — India's Premium Vehicle Marketplace{% endblock %}
+{% block nl_home %}active{% endblock %}
+
+{% block content %}
+<!-- HERO -->
+<div style="background:linear-gradient(180deg,var(--bg) 0%,var(--bg2) 100%);border-bottom:1px solid var(--border);">
+<div class="hero">
+  <div>
+    <div class="hero-eyebrow"><span></span> Live Marketplace · {{ stats.vehicles }}+ Vehicles</div>
+    <h1 class="hero-title">
+      INDIA'S<br>
+      <span class="line-em">PREMIUM</span>
+      <span class="line-sub">Vehicle Marketplace</span>
+    </h1>
+    <p class="hero-desc">Browse verified sellers. Compare prices. No middlemen — connect directly with owners across India.</p>
+    <div class="hero-ctas">
+      <a href="{% url 'listings' %}" class="btn btn-ember btn-lg">Browse Listings <i class="bi bi-arrow-right"></i></a>
+      <a href="{% url 'register_seller' %}" class="btn btn-ghost btn-lg">Sell Your Vehicle</a>
+    </div>
+    <!-- Search -->
+    <form action="{% url 'listings' %}" method="get" class="hero-search">
+      <div class="hero-search-field">
+        <span class="hero-search-label">Search</span>
+        <input class="vw-input" name="q" placeholder="Brand, model, keyword...">
+      </div>
+      <div class="hero-search-field" style="max-width:180px;">
+        <span class="hero-search-label">Category</span>
+        <select class="vw-select" name="category">
+          <option value="">All Categories</option>
+          {% for c in categories %}<option value="{{ c.slug }}">{{ c.icon }} {{ c.name }}</option>{% endfor %}
+        </select>
+      </div>
+      <div class="hero-search-field" style="max-width:160px;">
+        <span class="hero-search-label">Fuel</span>
+        <select class="vw-select" name="fuel">
+          <option value="">Any Fuel</option>
+          <option value="petrol">Petrol</option>
+          <option value="diesel">Diesel</option>
+          <option value="electric">⚡ Electric</option>
+          <option value="cng">CNG</option>
+        </select>
+      </div>
+      <div style="padding-top:1.25rem;">
+        <button type="submit" class="btn btn-ember">Search</button>
+      </div>
+    </form>
+    <div class="hero-stats-row">
+      <div><div class="hero-stat-n">{{ stats.vehicles }}+</div><div class="hero-stat-l">Vehicles</div></div>
+      <div><div class="hero-stat-n">{{ stats.sellers }}+</div><div class="hero-stat-l">Sellers</div></div>
+      <div><div class="hero-stat-n">{{ stats.brands }}+</div><div class="hero-stat-l">Brands</div></div>
+      <div><div class="hero-stat-n">{{ stats.cities }}+</div><div class="hero-stat-l">Cities</div></div>
+    </div>
+  </div>
+  <div class="hero-visual">
+    <div class="hero-logo-wrap">
+      <div class="hero-ring"></div>
+      <div class="hero-ring2"></div>
+      <div class="hero-dot"></div>
+      <div class="hero-dot"></div>
+      <img class="hero-logo-img" src="{% static 'marketplace/images/logo.png' %}" alt="Vehicle World">
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- CATEGORIES -->
+<section class="section" id="cats" style="background:var(--bg2);border-top:1px solid var(--border);border-bottom:1px solid var(--border);">
+  <div class="container">
+
+    <!-- 3 SIMPLE CATEGORY BUTTONS -->
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1.25rem;margin-bottom:2.5rem;">
+
+      <button onclick="switchCat('two_wheeler',this)"
+        id="btn-two_wheeler"
+        style="display:flex;flex-direction:column;align-items:center;justify-content:center;
+               gap:0.75rem;padding:2rem 1rem;
+               background:#FF4500;border:none;border-radius:14px;
+               cursor:pointer;transition:all 0.2s;position:relative;overflow:hidden;">
+        <span style="font-size:3rem;line-height:1;">🏍️</span>
+        <div>
+          <div style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.1rem;color:white;margin-bottom:0.2rem;">Two Wheeler</div>
+          <div style="font-size:0.78rem;color:rgba(255,255,255,0.8);">Bikes &amp; Scooters</div>
+        </div>
+      </button>
+
+      <button onclick="switchCat('three_wheeler',this)"
+        id="btn-three_wheeler"
+        style="display:flex;flex-direction:column;align-items:center;justify-content:center;
+               gap:0.75rem;padding:2rem 1rem;
+               background:#0F0F18;border:2px solid rgba(255,255,255,0.1);border-radius:14px;
+               cursor:pointer;transition:all 0.2s;position:relative;overflow:hidden;">
+        <span style="font-size:3rem;line-height:1;">🛺</span>
+        <div>
+          <div style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.1rem;color:white;margin-bottom:0.2rem;">Three Wheeler</div>
+          <div style="font-size:0.78rem;color:rgba(255,255,255,0.5);">Auto Rickshaws</div>
+        </div>
+      </button>
+
+      <button onclick="switchCat('four_wheeler',this)"
+        id="btn-four_wheeler"
+        style="display:flex;flex-direction:column;align-items:center;justify-content:center;
+               gap:0.75rem;padding:2rem 1rem;
+               background:#0F0F18;border:2px solid rgba(255,255,255,0.1);border-radius:14px;
+               cursor:pointer;transition:all 0.2s;position:relative;overflow:hidden;">
+        <span style="font-size:3rem;line-height:1;">🚗</span>
+        <div>
+          <div style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.1rem;color:white;margin-bottom:0.2rem;">Four Wheeler</div>
+          <div style="font-size:0.78rem;color:rgba(255,255,255,0.5);">Cars &amp; SUVs</div>
+        </div>
+      </button>
+
+    </div>
+
+    <!-- TWO WHEELER LISTINGS -->
+    <div id="panel-two_wheeler">
+      {% if two_w %}
+      <div class="grid-4">{% for v in two_w %}{% include 'marketplace/partials/vcard.html' with vehicle=v %}{% endfor %}</div>
+      {% else %}
+      <div class="empty-state"><div class="empty-icon">🏍️</div><div class="empty-title">No two-wheeler listings yet</div></div>
+      {% endif %}
+      <div style="text-align:center;margin-top:2rem;">
+        <a href="{% url 'category' 'two_wheeler' %}" class="btn btn-ember">View All Two Wheelers <i class="bi bi-arrow-right"></i></a>
+      </div>
+    </div>
+
+    <!-- THREE WHEELER LISTINGS -->
+    <div id="panel-three_wheeler" style="display:none;">
+      {% if three_w %}
+      <div class="grid-4">{% for v in three_w %}{% include 'marketplace/partials/vcard.html' with vehicle=v %}{% endfor %}</div>
+      {% else %}
+      <div class="empty-state"><div class="empty-icon">🛺</div><div class="empty-title">No three-wheeler listings yet</div></div>
+      {% endif %}
+      <div style="text-align:center;margin-top:2rem;">
+        <a href="{% url 'category' 'three_wheeler' %}" class="btn btn-ember">View All Three Wheelers <i class="bi bi-arrow-right"></i></a>
+      </div>
+    </div>
+
+    <!-- FOUR WHEELER LISTINGS -->
+    <div id="panel-four_wheeler" style="display:none;">
+      {% if four_w %}
+      <div class="grid-4">{% for v in four_w %}{% include 'marketplace/partials/vcard.html' with vehicle=v %}{% endfor %}</div>
+      {% else %}
+      <div class="empty-state"><div class="empty-icon">🚗</div><div class="empty-title">No four-wheeler listings yet</div></div>
+      {% endif %}
+      <div style="text-align:center;margin-top:2rem;">
+        <a href="{% url 'category' 'four_wheeler' %}" class="btn btn-ember">View All Four Wheelers <i class="bi bi-arrow-right"></i></a>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<script>
+function switchCat(slug, clickedBtn) {
+  // Hide all panels
+  ['two_wheeler','three_wheeler','four_wheeler'].forEach(function(s) {
+    document.getElementById('panel-' + s).style.display = 'none';
+    var b = document.getElementById('btn-' + s);
+    b.style.background = '#0F0F18';
+    b.style.border = '2px solid rgba(255,255,255,0.1)';
+    var sub = b.querySelector('div > div:last-child');
+    if (sub) sub.style.color = 'rgba(255,255,255,0.5)';
+  });
+  // Show clicked panel
+  document.getElementById('panel-' + slug).style.display = 'block';
+  // Style active button
+  clickedBtn.style.background = '#FF4500';
+  clickedBtn.style.border = '2px solid #FF4500';
+  var sub = clickedBtn.querySelector('div > div:last-child');
+  if (sub) sub.style.color = 'rgba(255,255,255,0.85)';
+}
+</script>
+
+<!-- NEW LISTINGS -->
+<section class="section" style="background:var(--bg2);border-top:1px solid var(--border);border-bottom:1px solid var(--border);">
+  <div class="container">
+    <div class="flex-between" style="margin-bottom:2.5rem;flex-wrap:wrap;gap:1rem;">
+      <div>
+        <div class="sec-eyebrow"><i class="bi bi-clock-history"></i> Fresh Arrivals</div>
+        <h2 class="sec-title">New in Marketplace</h2>
+        <p class="sec-sub">Just added — be the first to enquire</p>
+      </div>
+      <a href="{% url 'listings' %}" class="view-all-link">View All <i class="bi bi-arrow-right"></i></a>
+    </div>
+    <div class="grid-4">
+      {% for v in latest %}{% include 'marketplace/partials/vcard.html' with vehicle=v show_new=1 %}{% endfor %}
+    </div>
+  </div>
+</section>
+
+<!-- FEATURED -->
+{% if featured %}
+<section class="section">
+  <div class="container">
+    <div class="flex-between" style="margin-bottom:2.5rem;flex-wrap:wrap;gap:1rem;">
+      <div>
+        <div class="sec-eyebrow">Curated Selection</div>
+        <h2 class="sec-title">Featured Listings</h2>
+      </div>
+      <a href="{% url 'listings' %}" class="view-all-link">View All <i class="bi bi-arrow-right"></i></a>
+    </div>
+    <div class="grid-3">
+      {% for v in featured %}{% include 'marketplace/partials/vcard.html' with vehicle=v %}{% endfor %}
+    </div>
+  </div>
+</section>
+{% endif %}
+
+<!-- EV PROMO BAND -->
+<section style="background:linear-gradient(135deg,#05100a 0%,#071a10 100%);padding:5rem 0;border-top:1px solid rgba(34,197,94,0.12);border-bottom:1px solid rgba(34,197,94,0.12);position:relative;overflow:hidden;">
+  <div style="position:absolute;inset:0;background:radial-gradient(ellipse at 20% 50%,rgba(34,197,94,0.07) 0%,transparent 50%);pointer-events:none;"></div>
+  <div class="container" style="position:relative;">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:4rem;align-items:center;">
+      <div>
+        <div style="font-family:'DM Mono',monospace;font-size:0.72rem;letter-spacing:0.14em;text-transform:uppercase;color:var(--green2);margin-bottom:1rem;display:flex;align-items:center;gap:0.5rem;"><span style="width:8px;height:8px;background:var(--green2);border-radius:50%;display:inline-block;animation:blink 1.6s infinite;"></span>Electric Vehicle Hub</div>
+        <h2 style="font-family:'Syne',sans-serif;font-weight:800;font-size:clamp(2rem,4vw,3.5rem);line-height:1;color:var(--cream);margin-bottom:1.25rem;">Go Electric.<br><span style="color:var(--green2);">Save More.</span></h2>
+        <p style="color:var(--cream2);line-height:1.8;margin-bottom:2rem;">Explore our curated EV listings — from electric scooters to premium electric SUVs. Zero emissions, maximum performance.</p>
+        <a href="{% url 'electric_hub' %}" class="btn btn-green btn-lg">Explore EV Hub ⚡</a>
+      </div>
+      <div class="grid-2" style="gap:1rem;">
+        {% for v in electric %}
+        <div style="background:rgba(34,197,94,0.05);border:1px solid rgba(34,197,94,0.15);border-radius:10px;padding:1.1rem;text-decoration:none;display:block;transition:all var(--transition);" onmouseover="this.style.borderColor='rgba(34,197,94,0.35)';this.style.transform='translateY(-2px)';" onmouseout="this.style.borderColor='rgba(34,197,94,0.15)';this.style.transform='translateY(0)';" onclick="window.location='{% url 'vehicle_detail' v.pk %}'">
+          <div style="font-size:1.8rem;margin-bottom:0.5rem;">{% if v.category.slug == 'two_wheeler' %}⚡🏍️{% elif v.category.slug == 'three_wheeler' %}⚡🛺{% else %}⚡🚗{% endif %}</div>
+          <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:0.88rem;color:var(--cream);margin-bottom:0.25rem;">{{ v.brand }} {{ v.model_name }}</div>
+          <div style="font-family:'DM Mono',monospace;font-size:0.68rem;color:var(--green2);">{{ v.mileage }}</div>
+          <div style="font-family:'Syne',sans-serif;font-weight:800;font-size:1rem;color:var(--cream);margin-top:0.5rem;">{{ v.formatted_price }}</div>
+        </div>
+        {% empty %}
+        <div style="grid-column:1/-1;text-align:center;color:var(--cream2);padding:2rem;">EV listings coming soon!</div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TOP SELLERS -->
+<section class="section" style="background:var(--bg2);border-top:1px solid var(--border);">
+  <div class="container">
+    <div class="flex-between" style="margin-bottom:2.5rem;flex-wrap:wrap;gap:1rem;">
+      <div>
+        <div class="sec-eyebrow">Trusted Partners</div>
+        <h2 class="sec-title">Top Sellers</h2>
+      </div>
+      <a href="{% url 'sellers' %}" class="view-all-link">All Sellers <i class="bi bi-arrow-right"></i></a>
+    </div>
+    <div class="grid-4">
+      {% for s in top_sellers %}
+      <a href="{% url 'seller_profile' s.pk %}" class="seller-card">
+        <div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:1rem;">
+          <div class="seller-avatar">{% if s.avatar %}<img src="{{ s.avatar.url }}" alt="">{% else %}{{ s.name.0|upper }}{% endif %}</div>
+          <div>
+            <div class="seller-name">{{ s.name }}</div>
+            <div class="seller-loc"><i class="bi bi-geo-alt" style="font-size:0.65rem;"></i> {{ s.location }}</div>
+          </div>
+        </div>
+        <div style="height:1px;background:var(--border);margin-bottom:0.85rem;"></div>
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <div class="seller-rating">
+            <span class="stars">★★★★★</span>
+            <span style="font-family:'DM Mono',monospace;font-size:0.68rem;color:var(--cream2);">{{ s.rating }}</span>
+          </div>
+          <div style="font-family:'DM Mono',monospace;font-size:0.65rem;color:var(--cream2);">{{ s.cnt }} listings</div>
+        </div>
+      </a>
+      {% empty %}
+      <div style="grid-column:1/-1;text-align:center;color:var(--cream2);">No sellers yet.</div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="section">
+  <div class="container">
+    <div style="text-align:center;margin-bottom:3.5rem;">
+      <div class="sec-eyebrow" style="justify-content:center;">Simple Process</div>
+      <h2 class="sec-title">How Vehicle World Works</h2>
+    </div>
+    <div class="grid-3" style="gap:2rem;">
+      {% for step in "abc" %}
+      <div style="text-align:center;padding:2.5rem 1.5rem;background:var(--surface);border:1px solid var(--border);border-radius:var(--r2);position:relative;overflow:hidden;">
+        <div style="position:absolute;top:-10px;left:-10px;font-family:'Syne',sans-serif;font-weight:800;font-size:6rem;color:rgba(255,77,0,0.04);line-height:1;">{% if forloop.counter == 1 %}01{% elif forloop.counter == 2 %}02{% else %}03{% endif %}</div>
+        <div style="font-size:2.5rem;margin-bottom:1rem;position:relative;">{% if forloop.counter == 1 %}🔍{% elif forloop.counter == 2 %}📊{% else %}🤝{% endif %}</div>
+        <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:1.1rem;color:var(--cream);margin-bottom:0.75rem;position:relative;">{% if forloop.counter == 1 %}Browse & Search{% elif forloop.counter == 2 %}Compare & Shortlist{% else %}Connect & Deal{% endif %}</div>
+        <p style="color:var(--cream2);font-size:0.88rem;line-height:1.7;position:relative;">{% if forloop.counter == 1 %}Search thousands of verified listings. Filter by category, fuel type, price range and more.{% elif forloop.counter == 2 %}View full specs, multiple photos and seller ratings. Save your favourites.{% else %}Send a direct enquiry to the seller. No agents, no commissions — just you and the seller.{% endif %}</p>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<!-- SELL CTA -->
+<section style="background:var(--bg2);border-top:1px solid var(--border);padding:5rem 0;">
+  <div class="container">
+    <div style="display:grid;grid-template-columns:1fr auto;align-items:center;gap:3rem;flex-wrap:wrap;">
+      <div>
+        <div class="sec-eyebrow">For Sellers</div>
+        <h2 class="sec-title">List Your Vehicle.<br><span style="color:var(--ember);">Reach Millions.</span></h2>
+        <p class="sec-sub" style="max-width:520px;">Create a seller account, upload photos, set your price. Your listing goes live instantly — completely free.</p>
+      </div>
+      <div style="display:flex;gap:1rem;flex-direction:column;min-width:200px;">
+        <a href="{% url 'register_seller' %}" class="btn btn-ember btn-lg">Start Selling Free</a>
+        <a href="{% url 'login' %}" class="btn btn-ghost">Already a seller? Login</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+{% endblock %}

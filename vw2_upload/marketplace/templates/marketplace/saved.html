@@ -1,0 +1,16 @@
+{% extends 'marketplace/base.html' %}
+{% block title %}Saved Listings — Vehicle World{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div class="container"><h1 class="page-header-title">Saved Listings</h1><p style="color:var(--cream2);font-size:0.88rem;margin-top:0.4rem;font-family:'DM Mono',monospace;">{{ saved.count }} saved vehicles</p></div>
+</div>
+<section class="section">
+  <div class="container">
+    {% if saved %}
+    <div class="grid-auto">{% for s in saved %}{% include 'marketplace/partials/vcard.html' with vehicle=s.vehicle %}{% endfor %}</div>
+    {% else %}
+    <div class="empty-state"><div class="empty-icon">❤️</div><div class="empty-title">No saved listings</div><p style="color:var(--cream2);margin-bottom:1.5rem;">Browse vehicles and click Save to add them here</p><a href="{% url 'listings' %}" class="btn btn-ember">Browse Listings</a></div>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}

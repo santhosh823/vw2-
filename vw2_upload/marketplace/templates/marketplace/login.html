@@ -1,0 +1,44 @@
+{% extends 'marketplace/base.html' %}
+{% load static %}
+{% block title %}Login — Vehicle World{% endblock %}
+{% block content %}
+<div class="auth-layout">
+  <div class="auth-visual">
+    <div class="auth-visual-bg"></div>
+    <div style="position:relative;text-align:center;">
+      <img src="{% static 'marketplace/images/logo.png' %}" style="height:100px;margin-bottom:2rem;filter:drop-shadow(0 20px 40px rgba(255,77,0,0.3));animation:hero-float 6s ease-in-out infinite;" alt="VW">
+      <h2 style="font-family:'Syne',sans-serif;font-weight:800;font-size:2.5rem;color:var(--cream);line-height:1;">VEHICLE<br><span style="color:var(--ember);">WORLD</span></h2>
+      <p style="color:var(--cream2);margin-top:1rem;font-size:0.9rem;max-width:280px;">India's premium vehicle marketplace — buyers & sellers, united.</p>
+      <div style="display:flex;justify-content:center;gap:2rem;margin-top:2.5rem;padding-top:2rem;border-top:1px solid var(--border);">
+        <div style="text-align:center;"><div style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.5rem;color:var(--ember);">500+</div><div style="font-family:'DM Mono',monospace;font-size:0.62rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--cream2);">Vehicles</div></div>
+        <div style="text-align:center;"><div style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.5rem;color:var(--cobalt2);">100+</div><div style="font-family:'DM Mono',monospace;font-size:0.62rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--cream2);">Sellers</div></div>
+      </div>
+    </div>
+  </div>
+  <div class="auth-form-area">
+    <div class="auth-card">
+      <h1 class="auth-title">Welcome back</h1>
+      <p class="auth-sub">Sign in to your account to continue</p>
+      <form method="post">
+        {% csrf_token %}
+        <div class="form-group">
+          <label class="form-label">Username</label>
+          {{ form.username }}
+          {% if form.username.errors %}<div class="form-error">{{ form.username.errors.0 }}</div>{% endif %}
+        </div>
+        <div class="form-group">
+          <label class="form-label">Password</label>
+          {{ form.password }}
+          {% if form.password.errors %}<div class="form-error">{{ form.password.errors.0 }}</div>{% endif %}
+        </div>
+        <button type="submit" class="btn btn-ember btn-full btn-lg" style="margin-top:0.5rem;">Login <i class="bi bi-arrow-right"></i></button>
+      </form>
+      <div class="auth-divider"><span>New to Vehicle World?</span></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;">
+        <a href="{% url 'register_buyer' %}" class="btn btn-ghost" style="justify-content:center;border-color:rgba(26,86,219,0.3);color:#60a5fa;">🛒 Buyer</a>
+        <a href="{% url 'register_seller' %}" class="btn btn-ghost" style="justify-content:center;border-color:rgba(255,77,0,0.3);color:var(--ember);">🏪 Seller</a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,26 @@
+{% extends 'marketplace/base.html' %}
+{% block title %}EV Hub — Vehicle World{% endblock %}
+{% block nl_ev %}active{% endblock %}
+{% block content %}
+<div class="electric-hero">
+  <div class="container" style="position:relative;">
+    <div style="font-family:'DM Mono',monospace;font-size:0.72rem;letter-spacing:0.14em;text-transform:uppercase;color:var(--green2);margin-bottom:1rem;display:flex;align-items:center;gap:0.5rem;"><span style="width:8px;height:8px;background:var(--green2);border-radius:50%;animation:blink 1.6s infinite;display:inline-block;"></span>Electric Vehicle Hub</div>
+    <h1 class="electric-title">Go Electric.<br><span class="em">Zero Emissions.</span></h1>
+    <p style="color:var(--cream2);font-size:1.05rem;line-height:1.8;max-width:520px;margin-top:1.25rem;">Discover the future of mobility. Browse electric two-wheelers, three-wheelers, and four-wheelers from verified sellers.</p>
+    <div style="display:flex;gap:2.5rem;margin-top:2.5rem;padding-top:2rem;border-top:1px solid rgba(34,197,94,0.15);">
+      <div class="electric-stat"><div class="electric-stat-n">{{ vehicles.count }}</div><div class="electric-stat-l">EV Listings</div></div>
+      <div class="electric-stat"><div class="electric-stat-n">0</div><div class="electric-stat-l">Emissions</div></div>
+      <div class="electric-stat"><div class="electric-stat-n">∞</div><div class="electric-stat-l">Savings</div></div>
+    </div>
+  </div>
+</div>
+<section class="section">
+  <div class="container">
+    {% if vehicles %}
+    <div class="grid-auto">{% for v in vehicles %}{% include 'marketplace/partials/vcard.html' with vehicle=v %}{% endfor %}</div>
+    {% else %}
+    <div class="empty-state"><div class="empty-icon">⚡</div><div class="empty-title">EV listings coming soon</div></div>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}

@@ -1,0 +1,88 @@
+{% extends 'marketplace/base.html' %}
+{% block title %}All Listings — Vehicle World{% endblock %}
+{% block nl_list %}active{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div class="container">
+    <div class="breadcrumb"><a href="{% url 'home' %}">Home</a><span class="breadcrumb-sep">/</span><span>Listings</span></div>
+    <div style="display:flex;align-items:flex-end;justify-content:space-between;flex-wrap:wrap;gap:1rem;">
+      <div><h1 class="page-header-title">All Listings</h1><p style="color:var(--cream2);font-size:0.88rem;margin-top:0.4rem;font-family:'DM Mono',monospace;">{{ total }} vehicles found</p></div>
+    </div>
+  </div>
+</div>
+<div class="container" style="padding-top:2.5rem;padding-bottom:4rem;">
+  <div style="display:grid;grid-template-columns:280px 1fr;gap:2rem;align-items:start;">
+    <!-- SIDEBAR FILTERS -->
+    <div class="filter-sidebar">
+      <div class="filter-title">Filters</div>
+      <form method="get" action="">
+        <div class="filter-group">
+          <div class="filter-group-label">Search</div>
+          <input class="vw-input" name="q" value="{{ q }}" placeholder="Brand, model...">
+        </div>
+        <div class="filter-group">
+          <div class="filter-group-label">Category</div>
+          <select class="vw-select" name="category">
+            <option value="">All</option>
+            {% for c in categories %}
+            <option value="{{ c.slug }}" {% if selected_cat == c.slug %}selected{% endif %}>{{ c.icon }} {{ c.name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="filter-group">
+          <div class="filter-group-label">Fuel Type</div>
+          <select class="vw-select" name="fuel">
+            <option value="">Any</option>
+            <option value="petrol">Petrol</option>
+            <option value="diesel">Diesel</option>
+            <option value="electric">⚡ Electric</option>
+            <option value="hybrid">Hybrid</option>
+            <option value="cng">CNG</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <div class="filter-group-label">Condition</div>
+          <select class="vw-select" name="condition">
+            <option value="">Any</option>
+            <option value="new">Brand New</option>
+            <option value="excellent">Excellent</option>
+            <option value="good">Good</option>
+            <option value="fair">Fair</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <div class="filter-group-label">Price Range (₹)</div>
+          <input class="vw-input" name="min_price" placeholder="Min price" style="margin-bottom:0.5rem;">
+          <input class="vw-input" name="max_price" placeholder="Max price">
+        </div>
+        <div class="filter-group">
+          <div class="filter-group-label">Sort By</div>
+          <select class="vw-select" name="sort">
+            <option value="">Latest</option>
+            <option value="price_asc">Price: Low → High</option>
+            <option value="price_desc">Price: High → Low</option>
+            <option value="year_desc">Newest Year</option>
+          </select>
+        </div>
+        <button type="submit" class="btn btn-ember btn-full">Apply Filters</button>
+        <a href="{% url 'listings' %}" class="btn btn-ghost btn-full" style="margin-top:0.5rem;">Clear All</a>
+      </form>
+    </div>
+    <!-- GRID -->
+    <div>
+      {% if vehicles %}
+      <div class="grid-auto">
+        {% for v in vehicles %}{% include 'marketplace/partials/vcard.html' with vehicle=v show_new=1 %}{% endfor %}
+      </div>
+      {% else %}
+      <div class="empty-state">
+        <div class="empty-icon">🔍</div>
+        <div class="empty-title">No listings found</div>
+        <p style="color:var(--cream2);font-size:0.88rem;margin-bottom:1.5rem;">Try adjusting your filters</p>
+        <a href="{% url 'listings' %}" class="btn btn-ember">Clear Filters</a>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

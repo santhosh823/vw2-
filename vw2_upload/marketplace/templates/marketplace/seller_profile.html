@@ -1,0 +1,42 @@
+{% extends 'marketplace/base.html' %}
+{% block title %}{{ seller.name }} — Vehicle World{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div class="container">
+    <div class="breadcrumb"><a href="{% url 'sellers' %}">Sellers</a><span class="breadcrumb-sep">/</span><span>{{ seller.name }}</span></div>
+  </div>
+</div>
+<section class="section">
+  <div class="container">
+    <div style="display:grid;grid-template-columns:300px 1fr;gap:2.5rem;align-items:start;">
+      <div>
+        <div class="card-panel" style="text-align:center;margin-bottom:1.25rem;">
+          <div class="seller-avatar" style="width:72px;height:72px;font-size:1.8rem;margin:0 auto 1rem;">{% if seller.avatar %}<img src="{{ seller.avatar.url }}" alt="">{% else %}{{ seller.name.0|upper }}{% endif %}</div>
+          <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:1.1rem;color:var(--cream);">{{ seller.name }}</div>
+          <div style="font-family:'DM Mono',monospace;font-size:0.65rem;color:var(--ember);letter-spacing:0.1em;text-transform:uppercase;margin:0.25rem 0;">Verified Seller</div>
+          <div style="height:1px;background:var(--border);margin:1rem 0;"></div>
+          <div style="display:flex;flex-direction:column;gap:0.6rem;text-align:left;">
+            <div style="display:flex;align-items:center;gap:0.6rem;font-size:0.85rem;color:var(--cream2);"><i class="bi bi-geo-alt"></i>{{ seller.location }}</div>
+            <div style="display:flex;align-items:center;gap:0.6rem;font-size:0.85rem;color:var(--cream2);"><i class="bi bi-telephone"></i><a href="tel:{{ seller.phone }}" style="color:var(--cream2);text-decoration:none;">{{ seller.phone }}</a></div>
+            <div style="display:flex;align-items:center;gap:0.6rem;font-size:0.85rem;color:var(--cream2);word-break:break-all;"><i class="bi bi-envelope"></i><a href="mailto:{{ seller.email }}" style="color:var(--cream2);text-decoration:none;">{{ seller.email }}</a></div>
+          </div>
+          <div style="height:1px;background:var(--border);margin:1rem 0;"></div>
+          <div style="display:flex;justify-content:space-between;">
+            <div style="text-align:center;"><div style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.5rem;color:var(--ember);">{{ vehicles.count }}</div><div style="font-family:'DM Mono',monospace;font-size:0.62rem;color:var(--cream2);text-transform:uppercase;letter-spacing:0.08em;">Listings</div></div>
+            <div style="text-align:center;"><div style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.5rem;color:var(--gold2);">{{ seller.rating }}</div><div style="font-family:'DM Mono',monospace;font-size:0.62rem;color:var(--cream2);text-transform:uppercase;letter-spacing:0.08em;">Rating</div></div>
+          </div>
+        </div>
+        {% if seller.bio %}<div class="card-panel"><p style="color:var(--cream2);font-size:0.88rem;line-height:1.7;">{{ seller.bio }}</p></div>{% endif %}
+      </div>
+      <div>
+        <h2 style="font-family:'Syne',sans-serif;font-weight:700;font-size:1.3rem;color:var(--cream);margin-bottom:1.5rem;">Listings by {{ seller.name }}</h2>
+        {% if vehicles %}
+        <div class="grid-auto">{% for v in vehicles %}{% include 'marketplace/partials/vcard.html' with vehicle=v %}{% endfor %}</div>
+        {% else %}
+        <div class="empty-state"><div class="empty-icon">🚗</div><div class="empty-title">No active listings</div></div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

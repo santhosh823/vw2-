@@ -1,0 +1,38 @@
+{% extends 'marketplace/base.html' %}
+{% load static %}
+{% block title %}Register — Vehicle World{% endblock %}
+{% block content %}
+<div style="min-height:calc(100vh - 64px);background:var(--bg2);display:flex;align-items:center;justify-content:center;padding:3rem 1rem;">
+  <div style="max-width:800px;width:100%;">
+    <div style="text-align:center;margin-bottom:3rem;">
+      <img src="{% static 'marketplace/images/logo.png' %}" style="height:70px;margin-bottom:1.5rem;" alt="">
+      <h1 style="font-family:'Syne',sans-serif;font-weight:800;font-size:2.5rem;color:var(--cream);">Join Vehicle World</h1>
+      <p style="color:var(--cream2);margin-top:0.5rem;">Choose your account type to get started</p>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;">
+      <a href="{% url 'register_buyer' %}" class="choice-card choice-card-buyer">
+        <span class="choice-tag">Buyer</span>
+        <div class="choice-icon">🛒</div>
+        <div class="choice-name">Buyer Account</div>
+        <p class="choice-desc">Browse thousands of vehicles and connect with sellers directly.</p>
+        <ul class="choice-features">
+          <li>Browse all listings</li><li>Save favourites</li><li>Send enquiries</li><li>Completely free</li>
+        </ul>
+        <div class="btn btn-cobalt btn-full" style="margin-top:1.5rem;justify-content:center;">Create Buyer Account →</div>
+      </a>
+      <a href="{% url 'register_seller' %}" class="choice-card choice-card-seller">
+        <span class="popular-ribbon">Popular</span>
+        <span class="choice-tag">Seller</span>
+        <div class="choice-icon">🏪</div>
+        <div class="choice-name">Seller Account</div>
+        <p class="choice-desc">List vehicles, upload photos, manage your inventory and reach buyers.</p>
+        <ul class="choice-features">
+          <li>Unlimited listings</li><li>3 photos per listing</li><li>Dashboard & analytics</li><li>Receive direct enquiries</li>
+        </ul>
+        <div class="btn btn-ember btn-full" style="margin-top:1.5rem;justify-content:center;">Create Seller Account →</div>
+      </a>
+    </div>
+    <p style="text-align:center;margin-top:2rem;color:var(--cream2);font-size:0.88rem;">Already have an account? <a href="{% url 'login' %}" style="color:var(--ember);text-decoration:none;">Login here</a></p>
+  </div>
+</div>
+{% endblock %}
